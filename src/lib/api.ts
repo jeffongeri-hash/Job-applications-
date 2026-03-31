@@ -198,4 +198,56 @@ export const api = {
   onboarding: {
     get: () => client.get("/onboarding").then((r) => r.data),
   },
+
+  /**
+   * Manual job import — lets users paste a URL or raw description to add a job
+   * directly without running the full pipeline.
+   */
+  manualJobs: {
+    import: (data: { url?: string; title?: string; employer?: string; description?: string; location?: string }) =>
+      client.post("/manual-jobs", data).then((r) => r.data),
+  },
+
+  /**
+   * Search proxy — fires a targeted pipeline run restricted to specific keywords
+   * and locations by injecting them as scoring hints in the settings patch.
+   * The actual search still runs through job-ops extractors.
+   */
+  search: {
+    run: (opts: {
+      keywords: string[];
+      locations: string[];
+      sources?: string[];
+      topN?: number;
+      minScore?: number;
+      remoteOnly?: boolean;
+    }) =>
+      client.post("/pipeline/run", {
+        topN: opts.topN ?? 20,
+        minSuitabilityScore: opts.minScore ?? 50,
+        sources: opts.sources,
+        // job-ops passes these through to extractors as query overrides
+        searchKeywords: opts.keywords,
+        searchLocations: opts.locations,
+        remoteOnly: opts.remoteOnly ?? false,
+      }).then((r) => r.data),
+  },
+
+  /**
+   * Auto-apply queue — wraps the per-job process→summarize→pdf→apply flow
+   * for a batch of ready jobs. Each step can be awaited individually so the
+   * UI can show progress.
+   */
+  autoApply: {
+    processJob: async (id: string) => {
+      await client.post(`/jobs/${id}/process`);
+      await client.post(`/jobs/${id}/summarize`);
+      await client.post(`/jobs/${id}/generate-pdf`);
+      return client.post(`/jobs/${id}/apply`).then((r) => r.data);
+    },
+    generateCoverLetter: (id: string, style: string, profileText: string) =>
+      client.post(`/jobs/${id}/chat`, {
+        message: `Write a ${style} cover letter for this job based on my profile:\n\n${profileText}`,
+      }).then((r) => r.data),
+  },
 };
