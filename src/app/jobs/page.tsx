@@ -1,0 +1,329 @@
+"use client";
+
+import { useState, useMemo, Suspense } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useSearchParams, useRouter } from "next/navigation";
+import { api, JobStatus, JobListItem } from "@/lib/api";
+import { cn, scoreColor, STATUS_COLORS, STATUS_LABELS, timeAgo, formatSalary } from "@/lib/utils";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Search, RefreshCw, SkipForward, Star, ArrowRight,
+  ExternalLink, MapPin, Building2, Clock, Check, X,
+  ChevronDown, Filter, Trash2,
+} from "lucide-react";
+import Link from "next/link";
+import { toast } from "sonner";
+
+const TABS: { value: string; label: string; statuses?: JobStatus[] }[] = [
+  { value: "all", label: "All" },
+  { value: "discovered", label: "Discovered", statuses: ["discovered"] },
+  { value: "ready", label: "Ready", statuses: ["ready"] },
+  { value: "applied", label: "Applied", statuses: ["applied"] },
+  { value: "in_progress", label: "In Progress", statuses: ["in_progress"] },
+  { value: "skipped", label: "Skipped", statuses: ["skipped"] },
+];
+
+function JobsInner() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const queryClient = useQueryClient();
+  const [search, setSearch] = useState("");
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const tab = searchParams.get("status") ?? "all";
+
+  const tabDef = TABS.find((t) => t.value === tab) ?? TABS[0];
+
+  const { data, isLoading, refetch } = useQuery({
+    queryKey: ["jobs", tab],
+    queryFn: () => api.jobs.list(tabDef.statuses),
+    refetchInterval: 20_000,
+  });
+
+  const bulkAction = useMutation({
+    mutationFn: ({ action, ids }: { action: "skip" | "rescore" | "move_to_ready"; ids: string[] }) =>
+      api.jobs.action(action, ids),
+    onSuccess: (result, vars) => {
+      toast.success(`${vars.action}: ${result.succeeded}/${result.requested} succeeded`);
+      setSelected(new Set());
+      queryClient.invalidateQueries({ queryKey: ["jobs"] });
+    },
+    onError: () => toast.error("Bulk action failed"),
+  });
+
+  const jobs = useMemo(() => {
+    const all = data?.jobs ?? [];
+    if (!search.trim()) return all;
+    const q = search.toLowerCase();
+    return all.filter(
+      (j) =>
+        j.title.toLowerCase().includes(q) ||
+        j.employer.toLowerCase().includes(q) ||
+        j.location?.toLowerCase().includes(q) ||
+        j.source?.toLowerCase().includes(q)
+    );
+  }, [data, search]);
+
+  const toggleSelect = (id: string) => {
+    const next = new Set(selected);
+    if (next.has(id)) next.delete(id);
+    else next.add(id);
+    setSelected(next);
+  };
+
+  const toggleAll = () => {
+    if (selected.size === jobs.length) setSelected(new Set());
+    else setSelected(new Set(jobs.map((j) => j.id)));
+  };
+
+  const setTab = (t: string) => {
+    router.push(`/jobs?status=${t}`);
+    setSelected(new Set());
+  };
+
+  return (
+    <div className="p-6 space-y-4 max-w-7xl">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-xl font-bold text-white">Jobs</h1>
+          <p className="text-sm text-zinc-400 mt-0.5">{data?.total ?? 0} total jobs</p>
+        </div>
+        <Button variant="ghost" size="icon-sm" onClick={() => refetch()}>
+          <RefreshCw className="h-4 w-4" />
+        </Button>
+      </div>
+
+      {/* Tabs */}
+      <Tabs value={tab} onValueChange={setTab}>
+        <TabsList className="flex-wrap h-auto gap-1">
+          {TABS.map((t) => (
+            <TabsTrigger key={t.value} value={t.value} className="gap-1">
+              {t.label}
+              {data?.byStatus && t.statuses && (
+                <span className="text-xs opacity-60">
+                  {t.statuses.reduce((s, st) => s + (data.byStatus[st] ?? 0), 0)}
+                </span>
+              )}
+            </TabsTrigger>
+          ))}
+        </TabsList>
+      </Tabs>
+
+      {/* Search + bulk */}
+      <div className="flex items-center gap-2">
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500" />
+          <Input
+            placeholder="Search title, employer, location…"
+            className="pl-9"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+        </div>
+        {selected.size > 0 && (
+          <div className="flex items-center gap-1">
+            <span className="text-xs text-zinc-400">{selected.size} selected</span>
+            <Button
+              variant="outline" size="sm"
+              onClick={() => bulkAction.mutate({ action: "move_to_ready", ids: [...selected] })}
+            >
+              <ArrowRight className="h-3.5 w-3.5" /> Ready
+            </Button>
+            <Button
+              variant="outline" size="sm"
+              onClick={() => bulkAction.mutate({ action: "rescore", ids: [...selected] })}
+            >
+              <Star className="h-3.5 w-3.5" /> Rescore
+            </Button>
+            <Button
+              variant="outline" size="sm"
+              onClick={() => bulkAction.mutate({ action: "skip", ids: [...selected] })}
+            >
+              <SkipForward className="h-3.5 w-3.5" /> Skip
+            </Button>
+            <Button variant="ghost" size="icon-sm" onClick={() => setSelected(new Set())}>
+              <X className="h-3.5 w-3.5" />
+            </Button>
+          </div>
+        )}
+      </div>
+
+      {/* Job list */}
+      {isLoading ? (
+        <div className="space-y-2">
+          {Array.from({ length: 8 }).map((_, i) => (
+            <div key={i} className="h-16 rounded-xl bg-zinc-800/40 animate-pulse" />
+          ))}
+        </div>
+      ) : jobs.length === 0 ? (
+        <Card>
+          <CardContent className="py-16 text-center">
+            <p className="text-zinc-400">No jobs found.</p>
+            <p className="text-xs text-zinc-600 mt-1">Try running the pipeline or adjusting filters.</p>
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="space-y-1">
+          {/* Select all header */}
+          <div className="flex items-center gap-3 px-3 py-1">
+            <button
+              onClick={toggleAll}
+              className={cn(
+                "h-4 w-4 rounded border shrink-0 flex items-center justify-center transition-colors",
+                selected.size === jobs.length && jobs.length > 0
+                  ? "bg-zinc-200 border-zinc-200"
+                  : "border-zinc-600 hover:border-zinc-400"
+              )}
+            >
+              {selected.size === jobs.length && jobs.length > 0 && <Check className="h-3 w-3 text-zinc-900" />}
+            </button>
+            <span className="text-xs text-zinc-500">Select all ({jobs.length})</span>
+          </div>
+
+          {jobs.map((job) => (
+            <JobRow
+              key={job.id}
+              job={job}
+              selected={selected.has(job.id)}
+              onToggle={() => toggleSelect(job.id)}
+              onRefresh={() => queryClient.invalidateQueries({ queryKey: ["jobs"] })}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function JobRow({
+  job,
+  selected,
+  onToggle,
+  onRefresh,
+}: {
+  job: JobListItem;
+  selected: boolean;
+  onToggle: () => void;
+  onRefresh: () => void;
+}) {
+  const [loading, setLoading] = useState<string | null>(null);
+
+  const action = async (fn: () => Promise<unknown>, label: string) => {
+    setLoading(label);
+    try {
+      await fn();
+      toast.success(`${label} done`);
+      onRefresh();
+    } catch {
+      toast.error(`${label} failed`);
+    } finally {
+      setLoading(null);
+    }
+  };
+
+  return (
+    <div className={cn(
+      "flex items-center gap-3 rounded-xl border px-3 py-3 transition-colors group",
+      selected ? "border-zinc-600 bg-zinc-800/60" : "border-zinc-800/60 bg-zinc-900/40 hover:border-zinc-700 hover:bg-zinc-800/30"
+    )}>
+      {/* Checkbox */}
+      <button
+        onClick={(e) => { e.preventDefault(); onToggle(); }}
+        className={cn(
+          "h-4 w-4 rounded border shrink-0 flex items-center justify-center transition-colors",
+          selected ? "bg-zinc-200 border-zinc-200" : "border-zinc-600 hover:border-zinc-400"
+        )}
+      >
+        {selected && <Check className="h-3 w-3 text-zinc-900" />}
+      </button>
+
+      {/* Score */}
+      <div className="w-8 text-center shrink-0">
+        {job.suitabilityScore != null ? (
+          <span className={cn("text-sm font-bold tabular-nums", scoreColor(job.suitabilityScore))}>
+            {job.suitabilityScore}
+          </span>
+        ) : (
+          <span className="text-zinc-600 text-xs">—</span>
+        )}
+      </div>
+
+      {/* Job info */}
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center gap-2">
+          <Link href={`/jobs/${job.id}`} className="text-sm font-medium text-zinc-100 hover:text-white truncate">
+            {job.title}
+          </Link>
+          <span className={cn("px-1.5 py-0.5 rounded-full text-xs shrink-0", STATUS_COLORS[job.status])}>
+            {STATUS_LABELS[job.status]}
+          </span>
+        </div>
+        <div className="flex items-center gap-3 mt-0.5">
+          <span className="flex items-center gap-1 text-xs text-zinc-400">
+            <Building2 className="h-3 w-3" /> {job.employer}
+          </span>
+          {job.location && (
+            <span className="flex items-center gap-1 text-xs text-zinc-500">
+              <MapPin className="h-3 w-3" /> {job.location}
+            </span>
+          )}
+          {job.source && (
+            <span className="text-xs text-zinc-600">{job.source}</span>
+          )}
+          {(job.salaryMin || job.salaryMax) && (
+            <span className="text-xs text-zinc-400">{formatSalary(job.salaryMin, job.salaryMax, job.salaryCurrency)}</span>
+          )}
+        </div>
+      </div>
+
+      <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+        <span className="text-xs text-zinc-600 mr-2">{timeAgo(job.updatedAt)}</span>
+
+        {job.status === "discovered" && (
+          <Button
+            variant="ghost" size="icon-sm"
+            onClick={() => action(() => api.jobs.process(job.id), "Process")}
+            disabled={loading === "Process"}
+            title="Move to Ready"
+          >
+            <ArrowRight className="h-3.5 w-3.5" />
+          </Button>
+        )}
+        {(job.status === "discovered" || job.status === "ready") && (
+          <Button
+            variant="ghost" size="icon-sm"
+            onClick={() => action(() => api.jobs.skip(job.id), "Skip")}
+            disabled={loading === "Skip"}
+            title="Skip"
+          >
+            <SkipForward className="h-3.5 w-3.5" />
+          </Button>
+        )}
+        <Button
+          variant="ghost" size="icon-sm"
+          onClick={() => action(() => api.jobs.rescore(job.id), "Rescore")}
+          disabled={loading === "Rescore"}
+          title="Rescore"
+        >
+          <Star className="h-3.5 w-3.5" />
+        </Button>
+        <Link href={`/jobs/${job.id}`}>
+          <Button variant="ghost" size="icon-sm" title="Open">
+            <ExternalLink className="h-3.5 w-3.5" />
+          </Button>
+        </Link>
+      </div>
+    </div>
+  );
+}
+
+export default function JobsPage() {
+  return (
+    <Suspense>
+      <JobsInner />
+    </Suspense>
+  );
+}
