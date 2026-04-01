@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { Providers } from "@/components/providers";
 import { Sidebar } from "@/components/sidebar";
+import { ErrorBoundary } from "@/components/error-boundary";
 
 export const metadata: Metadata = {
   title: "JobOps — Job Application Automation",
@@ -16,7 +17,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <div className="flex h-full min-h-screen">
             <Sidebar />
             <main className="flex-1 ml-16 md:ml-56 min-h-screen overflow-auto">
-              {children}
+              <ErrorBoundary section="Page">
+                {children}
+              </ErrorBoundary>
             </main>
           </div>
         </Providers>

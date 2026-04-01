@@ -1,11 +1,13 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
+import { useMemo } from "react";
 import { api } from "@/lib/api";
 import { cn, scoreColor, STATUS_COLORS, STATUS_LABELS, timeAgo } from "@/lib/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
+import { ErrorBoundary } from "@/components/error-boundary";
 import {
   Briefcase, TrendingUp, Send, CheckCircle, Play,
   RefreshCw, ChevronRight, Activity,
@@ -27,22 +29,27 @@ const SCORE_BARS = [
 ];
 
 export default function DashboardPage() {
+  // Polling: dashboard stat cards update every 60s (not 30s) to reduce server load.
+  // Pipeline status stays at 10s since users watch it actively.
   const { data: jobsData, isLoading: jobsLoading, refetch: refetchJobs } = useQuery({
     queryKey: ["jobs-all"],
     queryFn: () => api.jobs.list(),
-    refetchInterval: 30_000,
+    refetchInterval: 60_000,
+    staleTime: 30_000,
   });
 
   const { data: pipelineStatus, refetch: refetchPipeline } = useQuery({
     queryKey: ["pipeline-status"],
     queryFn: () => api.pipeline.status(),
-    refetchInterval: 10_000,
+    // Poll fast while running, slow otherwise
+    refetchInterval: (query) => (query.state.data?.isRunning ? 5_000 : 15_000),
   });
 
   const { data: pipelineRuns } = useQuery({
     queryKey: ["pipeline-runs"],
     queryFn: () => api.pipeline.runs(),
-    refetchInterval: 15_000,
+    refetchInterval: 30_000,
+    staleTime: 20_000,
   });
 
   const handleRunPipeline = async () => {
@@ -58,7 +65,8 @@ export default function DashboardPage() {
   const jobs = jobsData?.jobs ?? [];
   const byStatus = jobsData?.byStatus ?? {};
 
-  const activityData = Array.from({ length: 7 }, (_, i) => {
+  // Memoised so these don't recalculate on every render (only when jobs changes)
+  const activityData = useMemo(() => Array.from({ length: 7 }, (_, i) => {
     const day = subDays(new Date(), 6 - i);
     const label = format(day, "MMM d");
     const dayStart = new Date(day).setHours(0, 0, 0, 0);
@@ -68,26 +76,30 @@ export default function DashboardPage() {
       (j) => j.status === "applied" && j.updatedAt >= dayStart && j.updatedAt < dayEnd
     ).length;
     return { label, discovered, applied };
-  });
+  }), [jobs]);
 
-  const scoreDist = SCORE_BARS.map((b) => ({
+  const scoreDist = useMemo(() => SCORE_BARS.map((b) => ({
     ...b,
     count: jobs.filter((j) => (j.suitabilityScore ?? 0) >= b.min && (j.suitabilityScore ?? 0) < b.max).length,
-  }));
+  })), [jobs]);
 
-  const statCards = [
+  const statCards = useMemo(() => [
     { label: "Discovered", value: byStatus.discovered ?? 0, icon: Briefcase, color: "text-blue-400", bg: "bg-blue-900/20", href: "/jobs?status=discovered" },
     { label: "Ready", value: byStatus.ready ?? 0, icon: CheckCircle, color: "text-purple-400", bg: "bg-purple-900/20", href: "/jobs?status=ready" },
     { label: "Applied", value: byStatus.applied ?? 0, icon: Send, color: "text-emerald-400", bg: "bg-emerald-900/20", href: "/jobs?status=applied" },
     { label: "In Progress", value: byStatus.in_progress ?? 0, icon: TrendingUp, color: "text-orange-400", bg: "bg-orange-900/20", href: "/jobs?status=in_progress" },
-  ];
+  ], [byStatus]);
 
-  const avgScore =
+  const avgScore = useMemo(() =>
     jobs.length > 0
       ? Math.round(jobs.reduce((s, j) => s + (j.suitabilityScore ?? 0), 0) / jobs.length)
-      : 0;
+      : 0,
+    [jobs]);
 
-  const recentJobs = [...jobs].sort((a, b) => b.createdAt - a.createdAt).slice(0, 5);
+  const recentJobs = useMemo(
+    () => [...jobs].sort((a, b) => b.createdAt - a.createdAt).slice(0, 5),
+    [jobs],
+  );
 
   return (
     <div className="p-6 space-y-6 max-w-7xl">

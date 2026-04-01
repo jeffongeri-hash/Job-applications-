@@ -209,45 +209,112 @@ export const api = {
   },
 
   /**
-   * Search proxy — fires a targeted pipeline run restricted to specific keywords
-   * and locations by injecting them as scoring hints in the settings patch.
-   * The actual search still runs through job-ops extractors.
+   * Search proxy — syncs scoring hints derived from full SearchPreferences into
+   * job-ops settings (PATCH /api/settings), then fires the pipeline run so the
+   * scorer has access to salary thresholds, blacklists, and keyword bonuses.
    */
   search: {
-    run: (opts: {
+    /**
+     * syncPrefsToSettings — pushes salary floor, keyword bonuses, and
+     * blacklist hints into job-ops settings so the LLM scorer can use them.
+     */
+    syncPrefsToSettings: async (prefs: {
+      keywords: string[];
+      salaryMin?: number;
+      salaryMax?: number;
+      salaryCurrency: string;
+      blacklistedKeywords: string[];
+      blacklistedCompanies: string[];
+      requireVisaSupport: boolean;
+      jobTypes: string[];
+      experienceLevels: string[];
+    }) => {
+      // Build a plain-English scoring hint block the LLM scorer can read
+      const hints: string[] = [];
+      if (prefs.salaryMin) hints.push(`Minimum salary: ${prefs.salaryMin} ${prefs.salaryCurrency}`);
+      if (prefs.salaryMax) hints.push(`Maximum salary: ${prefs.salaryMax} ${prefs.salaryCurrency}`);
+      if (prefs.jobTypes.length) hints.push(`Preferred job types: ${prefs.jobTypes.join(", ")}`);
+      if (prefs.experienceLevels.length) hints.push(`Target experience levels: ${prefs.experienceLevels.join(", ")}`);
+      if (prefs.requireVisaSupport) hints.push("Only consider roles offering visa sponsorship.");
+      if (prefs.blacklistedKeywords.length)
+        hints.push(`Penalise heavily (score < 30) any job mentioning: ${prefs.blacklistedKeywords.join(", ")}`);
+      if (prefs.blacklistedCompanies.length)
+        hints.push(`Disqualify jobs from these companies: ${prefs.blacklistedCompanies.join(", ")}`);
+
+      if (hints.length === 0) return;
+
+      await client.patch("/settings", {
+        scorerHints: hints.join("\n"),
+      });
+    },
+
+    run: async (opts: {
       keywords: string[];
       locations: string[];
       sources?: string[];
       topN?: number;
       minScore?: number;
       remoteOnly?: boolean;
-    }) =>
-      client.post("/pipeline/run", {
+      // full prefs for settings sync
+      prefs?: {
+        salaryMin?: number;
+        salaryMax?: number;
+        salaryCurrency: string;
+        blacklistedKeywords: string[];
+        blacklistedCompanies: string[];
+        requireVisaSupport: boolean;
+        jobTypes: string[];
+        experienceLevels: string[];
+      };
+    }) => {
+      // Sync scoring hints first so the scorer uses them during this run
+      if (opts.prefs) {
+        await api.search.syncPrefsToSettings({ keywords: opts.keywords, ...opts.prefs });
+      }
+      return client.post("/pipeline/run", {
         topN: opts.topN ?? 20,
         minSuitabilityScore: opts.minScore ?? 50,
         sources: opts.sources,
-        // job-ops passes these through to extractors as query overrides
         searchKeywords: opts.keywords,
         searchLocations: opts.locations,
         remoteOnly: opts.remoteOnly ?? false,
-      }).then((r) => r.data),
+      }).then((r) => r.data);
+    },
   },
 
   /**
-   * Auto-apply queue — wraps the per-job process→summarize→pdf→apply flow
-   * for a batch of ready jobs. Each step can be awaited individually so the
-   * UI can show progress.
+   * Auto-apply queue — wraps the per-job process→summarize→pdf→apply flow.
    */
   autoApply: {
     processJob: async (id: string) => {
       await client.post(`/jobs/${id}/process`);
       await client.post(`/jobs/${id}/summarize`);
-      await client.post(`/jobs/${id}/generate-pdf`);
-      return client.post(`/jobs/${id}/apply`).then((r) => r.data);
+      return client.post(`/jobs/${id}/generate-pdf`).then((r) => r.data);
     },
-    generateCoverLetter: (id: string, style: string, profileText: string) =>
-      client.post(`/jobs/${id}/chat`, {
-        message: `Write a ${style} cover letter for this job based on my profile:\n\n${profileText}`,
-      }).then((r) => r.data),
+    submitApplication: (id: string) =>
+      client.post(`/jobs/${id}/apply`).then((r) => r.data),
+
+    /**
+     * Generates a cover letter via the job chat endpoint, injecting the
+     * user's profile text AND their saved custom Q&A answers so the LLM
+     * can reference them in the letter.
+     */
+    generateCoverLetter: (
+      id: string,
+      style: string,
+      profileText: string,
+      customAnswers: { question: string; answer: string }[],
+    ) => {
+      const qaBlock =
+        customAnswers.length > 0
+          ? "\n\nMy pre-written answers to common questions:\n" +
+            customAnswers.map((qa) => `Q: ${qa.question}\nA: ${qa.answer}`).join("\n\n")
+          : "";
+      return client
+        .post(`/jobs/${id}/chat`, {
+          message: `Write a ${style} cover letter for this job. Use my profile and Q&A answers below.\n\n${profileText}${qaBlock}`,
+        })
+        .then((r) => r.data);
+    },
   },
 };

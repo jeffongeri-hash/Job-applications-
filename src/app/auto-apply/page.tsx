@@ -120,28 +120,32 @@ export default function AutoApplyPage() {
       await api.jobs.summarize(job.jobId);
       setStep(job.jobId, "summarize", "done");
 
-      // Step 2b: generate cover letter if enabled
+      // Step 2b: generate cover letter if enabled — passes custom Q&A so the
+      // LLM can weave pre-written answers into the letter
       if (settings?.coverLetterEnabled) {
-        const profileText = buildResumeText(loadProfile());
+        const profile = loadProfile();
+        const profileText = buildResumeText(profile);
         try {
           const cl = await api.autoApply.generateCoverLetter(
             job.jobId,
             settings.coverLetterStyle,
-            profileText
+            profileText,
+            settings.customAnswers,   // ← injected here
           );
           updateJob(job.jobId, { coverLetter: cl?.reply ?? cl?.message ?? "" });
         } catch {
-          // non-fatal
+          // non-fatal — cover letter failure doesn't block the rest
         }
       }
 
       // Step 3: PDF
       setStep(job.jobId, "pdf", "running");
-      const pdfResult = await api.jobs.generatePdf(job.jobId);
+      const pdfResult = await api.autoApply.processJob(job.jobId);
       setStep(job.jobId, "pdf", "done");
-      updateJob(job.jobId, { pdfPath: pdfResult?.data?.pdfPath });
+      updateJob(job.jobId, { pdfPath: pdfResult?.data?.pdfPath ?? pdfResult?.pdfPath });
 
-      // If review required, pause here
+      // If review required, pause here so the user can read the cover letter
+      // and check the PDF before we submit
       if (settings?.requireReview) {
         updateJob(job.jobId, { status: "review" });
         return;
@@ -149,7 +153,7 @@ export default function AutoApplyPage() {
 
       // Step 4: apply
       setStep(job.jobId, "apply", "running");
-      await api.jobs.apply(job.jobId);
+      await api.autoApply.submitApplication(job.jobId);
       setStep(job.jobId, "apply", "done");
       updateJob(job.jobId, { status: "done" });
     } catch (err: unknown) {
@@ -164,13 +168,16 @@ export default function AutoApplyPage() {
   const approveAndApply = async (jobId: string) => {
     setStep(jobId, "apply", "running");
     try {
-      await api.jobs.apply(jobId);
+      await api.autoApply.submitApplication(jobId);
       setStep(jobId, "apply", "done");
       updateJob(jobId, { status: "done" });
+      toast.success("Application submitted!");
       queryClient.invalidateQueries({ queryKey: ["jobs"] });
-    } catch {
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Apply failed";
       setStep(jobId, "apply", "error");
-      updateJob(jobId, { status: "error", errorMsg: "Apply failed" });
+      updateJob(jobId, { status: "error", errorMsg: msg });
+      toast.error(msg);
     }
   };
 

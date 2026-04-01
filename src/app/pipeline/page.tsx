@@ -11,7 +11,7 @@ import { Switch } from "@/components/ui/switch";
 import { Progress } from "@/components/ui/progress";
 import {
   Play, Square, RefreshCw, Activity, CheckCircle, XCircle,
-  Clock, Zap, Settings2, ChevronDown, ChevronUp, Info,
+  Clock, Zap, Settings2, ChevronDown, ChevronUp, Info, Save,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -363,25 +363,76 @@ function RunRow({ run }: { run: PipelineRun }) {
 function AutomationScheduler() {
   const [enabled, setEnabled] = useState(false);
   const [schedule, setSchedule] = useState("0 8 * * *");
-  const [saved, setSaved] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [copiedKey, setCopiedKey] = useState<string | null>(null);
 
-  // In a real integration this would PATCH /api/settings with a cron schedule.
-  // For now it stores in localStorage as a UI demo.
+  const API_URL =
+    typeof window !== "undefined"
+      ? (process.env.NEXT_PUBLIC_JOB_OPS_URL ?? "http://localhost:3005")
+      : "http://localhost:3005";
+
   useEffect(() => {
-    const stored = localStorage.getItem("jobops_schedule");
-    if (stored) {
-      const { enabled: e, cron } = JSON.parse(stored);
-      setEnabled(e);
-      setSchedule(cron);
-    }
+    try {
+      const stored = localStorage.getItem("jobops_schedule");
+      if (stored) {
+        const { enabled: e, cron } = JSON.parse(stored);
+        setEnabled(e);
+        setSchedule(cron);
+      }
+    } catch {}
   }, []);
 
-  const save = () => {
-    localStorage.setItem("jobops_schedule", JSON.stringify({ enabled, cron: schedule }));
-    setSaved(true);
-    toast.success(enabled ? `Schedule saved: ${schedule}` : "Schedule disabled");
-    setTimeout(() => setSaved(false), 2000);
+  // Persist cron preference locally AND push to job-ops settings so the
+  // backend's future-cron-support can pick it up automatically.
+  const save = async () => {
+    setSaving(true);
+    try {
+      localStorage.setItem("jobops_schedule", JSON.stringify({ enabled, cron: schedule }));
+      // Optimistic — job-ops doesn't currently have a native cron field, but
+      // this call future-proofs it: when they add it, we're already sending it.
+      await api.settings.patch({ ...(enabled ? { cronSchedule: schedule } : { cronSchedule: null }) } as Parameters<typeof api.settings.patch>[0]);
+      toast.success(enabled ? `Schedule saved: ${schedule}` : "Schedule disabled");
+    } catch {
+      // Settings patch may 422 for unknown fields — still save locally
+      localStorage.setItem("jobops_schedule", JSON.stringify({ enabled, cron: schedule }));
+      toast.success("Saved locally — use one of the snippets below to wire to your host");
+    } finally {
+      setSaving(false);
+    }
   };
+
+  const copy = (key: string, text: string) => {
+    navigator.clipboard.writeText(text).then(() => {
+      setCopiedKey(key);
+      setTimeout(() => setCopiedKey(null), 2000);
+    });
+  };
+
+  const curlCmd = `curl -X POST ${API_URL}/api/pipeline/run \\
+  -H "Content-Type: application/json" \\
+  -d '{"topN":20,"minSuitabilityScore":60}'`;
+
+  const systemdService = `[Unit]
+Description=JobOps pipeline run
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/curl -s -X POST ${API_URL}/api/pipeline/run \\
+  -H "Content-Type: application/json" \\
+  -d '{"topN":20,"minSuitabilityScore":60}'`;
+
+  const systemdTimer = `[Unit]
+Description=JobOps pipeline schedule
+
+[Timer]
+OnCalendar=${schedule.replace(/(\d+) (\d+) \* \* (.+)/, "$2:$1")}
+Persistent=true
+
+[Install]
+WantedBy=timers.target`;
+
+  const dockerCron = `# Add to your crontab (crontab -e):
+${schedule} docker exec job-ops curl -s -X POST http://localhost:3001/api/pipeline/run -H "Content-Type: application/json" -d '{"topN":20}'`;
 
   const PRESETS = [
     { label: "Daily 8am", cron: "0 8 * * *" },
@@ -400,10 +451,8 @@ function AutomationScheduler() {
           <Switch checked={enabled} onCheckedChange={setEnabled} />
         </div>
       </CardHeader>
-      <CardContent className={cn("space-y-4", !enabled && "opacity-50 pointer-events-none")}>
-        <p className="text-xs text-zinc-400">
-          Schedule automatic pipeline runs using cron syntax. The job-ops server must be running with cron support.
-        </p>
+      <CardContent className={cn("space-y-5", !enabled && "opacity-50 pointer-events-none")}>
+        {/* Preset buttons */}
         <div className="flex flex-wrap gap-2">
           {PRESETS.map((p) => (
             <button
@@ -420,6 +469,8 @@ function AutomationScheduler() {
             </button>
           ))}
         </div>
+
+        {/* Cron input */}
         <div>
           <label className="text-xs text-zinc-400 mb-1.5 block">Cron expression</label>
           <div className="flex gap-2">
@@ -427,16 +478,42 @@ function AutomationScheduler() {
               value={schedule}
               onChange={(e) => setSchedule(e.target.value)}
               placeholder="0 8 * * *"
-              className="font-mono"
+              className="font-mono flex-1"
             />
-            <Button variant="outline" size="sm" onClick={save}>
-              {saved ? <CheckCircle className="h-3.5 w-3.5 text-emerald-400" /> : "Save"}
+            <Button variant="outline" size="sm" onClick={save} disabled={saving}>
+              {saving
+                ? <span className="h-3.5 w-3.5 rounded-full border-2 border-zinc-400 border-t-transparent animate-spin" />
+                : <Save className="h-3.5 w-3.5" />}
             </Button>
           </div>
-          <p className="text-xs text-zinc-600 mt-1.5 flex items-center gap-1">
-            <Info className="h-3 w-3" />
-            Configure cron in your Docker compose or systemd to call POST /api/pipeline/run
-          </p>
+        </div>
+
+        {/* Integration snippets */}
+        <div className="space-y-3">
+          <p className="text-xs text-zinc-400 font-medium">Wire to your host — copy the right snippet:</p>
+
+          {[
+            { key: "curl", label: "One-off curl", code: curlCmd },
+            { key: "docker", label: "Docker crontab", code: dockerCron },
+            { key: "systemd-svc", label: "systemd .service", code: systemdService },
+            { key: "systemd-timer", label: "systemd .timer", code: systemdTimer },
+          ].map(({ key, label, code }) => (
+            <div key={key} className="rounded-lg border border-zinc-800 overflow-hidden">
+              <div className="flex items-center justify-between px-3 py-2 bg-zinc-900/60 border-b border-zinc-800">
+                <span className="text-xs font-medium text-zinc-400">{label}</span>
+                <button
+                  onClick={() => copy(key, code)}
+                  className="text-xs text-zinc-500 hover:text-zinc-300 flex items-center gap-1"
+                >
+                  {copiedKey === key ? <CheckCircle className="h-3.5 w-3.5 text-emerald-400" /> : <Info className="h-3.5 w-3.5" />}
+                  {copiedKey === key ? "Copied!" : "Copy"}
+                </button>
+              </div>
+              <pre className="text-xs font-mono text-zinc-400 p-3 overflow-x-auto bg-zinc-950/60 leading-relaxed">
+                {code}
+              </pre>
+            </div>
+          ))}
         </div>
       </CardContent>
     </Card>

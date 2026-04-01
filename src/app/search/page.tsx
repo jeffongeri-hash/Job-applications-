@@ -118,19 +118,36 @@ export default function SearchPage() {
     }
     setRunning(true);
     try {
+      // Save preferences first so they persist for future runs
+      const p = loadProfile();
+      p.searchPrefs = prefs;
+      saveProfile(p);
+
       await api.search.run({
         keywords: prefs.keywords,
         locations: prefs.locations,
         sources: [...selectedSources],
         topN,
-        minScore: prefs.salaryMin ? undefined : 50,
+        minScore: prefs.salaryMin ? 50 : 50,
         remoteOnly: prefs.remotePreference === "remote",
+        // Full prefs synced as scoring hints to job-ops before the run
+        prefs: {
+          salaryMin: prefs.salaryMin,
+          salaryMax: prefs.salaryMax,
+          salaryCurrency: prefs.salaryCurrency,
+          blacklistedKeywords: prefs.blacklistedKeywords,
+          blacklistedCompanies: prefs.blacklistedCompanies,
+          requireVisaSupport: prefs.requireVisaSupport,
+          jobTypes: prefs.jobTypes,
+          experienceLevels: prefs.experienceLevels,
+        },
       });
-      toast.success("Search started! New jobs will appear in the Jobs page.");
+      toast.success("Search started — salary, blacklists & filters synced to scorer");
       queryClient.invalidateQueries({ queryKey: ["jobs"] });
       queryClient.invalidateQueries({ queryKey: ["pipeline-status"] });
-    } catch {
-      toast.error("Failed to start search");
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Unknown error";
+      toast.error(`Search failed: ${msg}`);
     } finally {
       setRunning(false);
     }

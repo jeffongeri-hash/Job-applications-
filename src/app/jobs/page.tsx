@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, Suspense } from "react";
+import { useState, useMemo, Suspense, useEffect, useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useSearchParams, useRouter } from "next/navigation";
 import { api, JobStatus, JobListItem } from "@/lib/api";
@@ -8,15 +8,27 @@ import { cn, scoreColor, STATUS_COLORS, STATUS_LABELS, timeAgo, formatSalary } f
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Search, RefreshCw, SkipForward, Star, ArrowRight,
-  ExternalLink, MapPin, Building2, Clock, Check, X,
-  ChevronDown, Filter, Trash2,
+  ExternalLink, MapPin, Building2, Check, X, ChevronLeft, ChevronRight,
 } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
+
+const PAGE_SIZE = 50;
+
+/** Debounce a value by `delay` ms — prevents re-filtering on every keystroke */
+function useDebounced<T>(value: T, delay = 250): T {
+  const [debounced, setDebounced] = useState(value);
+  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => {
+    if (timer.current) clearTimeout(timer.current);
+    timer.current = setTimeout(() => setDebounced(value), delay);
+    return () => { if (timer.current) clearTimeout(timer.current); };
+  }, [value, delay]);
+  return debounced;
+}
 
 const TABS: { value: string; label: string; statuses?: JobStatus[] }[] = [
   { value: "all", label: "All" },
@@ -32,15 +44,18 @@ function JobsInner() {
   const searchParams = useSearchParams();
   const queryClient = useQueryClient();
   const [search, setSearch] = useState("");
+  const [page, setPage] = useState(0);
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const tab = searchParams.get("status") ?? "all";
+  const debouncedSearch = useDebounced(search, 250);
 
   const tabDef = TABS.find((t) => t.value === tab) ?? TABS[0];
 
   const { data, isLoading, refetch } = useQuery({
     queryKey: ["jobs", tab],
     queryFn: () => api.jobs.list(tabDef.statuses),
-    refetchInterval: 20_000,
+    refetchInterval: 45_000,   // reduced from 20s — list is large
+    staleTime: 30_000,
   });
 
   const bulkAction = useMutation({
@@ -54,10 +69,11 @@ function JobsInner() {
     onError: () => toast.error("Bulk action failed"),
   });
 
-  const jobs = useMemo(() => {
+  // Filter uses debounced value so we don't re-filter on every keystroke
+  const filteredJobs = useMemo(() => {
     const all = data?.jobs ?? [];
-    if (!search.trim()) return all;
-    const q = search.toLowerCase();
+    if (!debouncedSearch.trim()) return all;
+    const q = debouncedSearch.toLowerCase();
     return all.filter(
       (j) =>
         j.title.toLowerCase().includes(q) ||
@@ -65,7 +81,17 @@ function JobsInner() {
         j.location?.toLowerCase().includes(q) ||
         j.source?.toLowerCase().includes(q)
     );
-  }, [data, search]);
+  }, [data, debouncedSearch]);
+
+  // Pagination: slice into pages of PAGE_SIZE
+  const totalPages = Math.max(1, Math.ceil(filteredJobs.length / PAGE_SIZE));
+  const jobs = useMemo(
+    () => filteredJobs.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE),
+    [filteredJobs, page],
+  );
+
+  // Reset to page 0 when filter changes
+  useEffect(() => { setPage(0); }, [debouncedSearch, tab]);
 
   const toggleSelect = (id: string) => {
     const next = new Set(selected);
@@ -192,6 +218,38 @@ function JobsInner() {
               onRefresh={() => queryClient.invalidateQueries({ queryKey: ["jobs"] })}
             />
           ))}
+        </div>
+      )}
+
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <div className="flex items-center justify-between pt-2">
+          <p className="text-xs text-zinc-500">
+            {page * PAGE_SIZE + 1}–{Math.min((page + 1) * PAGE_SIZE, filteredJobs.length)} of {filteredJobs.length}
+          </p>
+          <div className="flex items-center gap-1">
+            <Button variant="ghost" size="icon-sm" disabled={page === 0} onClick={() => setPage(page - 1)}>
+              <ChevronLeft className="h-4 w-4" />
+            </Button>
+            {Array.from({ length: Math.min(totalPages, 7) }, (_, i) => {
+              const p = totalPages <= 7 ? i : Math.max(0, Math.min(page - 3 + i, totalPages - 7 + i));
+              return (
+                <button
+                  key={p}
+                  onClick={() => setPage(p)}
+                  className={cn(
+                    "h-7 w-7 rounded text-xs transition-colors",
+                    p === page ? "bg-zinc-700 text-white font-medium" : "text-zinc-500 hover:bg-zinc-800"
+                  )}
+                >
+                  {p + 1}
+                </button>
+              );
+            })}
+            <Button variant="ghost" size="icon-sm" disabled={page >= totalPages - 1} onClick={() => setPage(page + 1)}>
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          </div>
         </div>
       )}
     </div>
