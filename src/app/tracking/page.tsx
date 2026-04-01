@@ -1,18 +1,19 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api, InboxItem } from "@/lib/api";
 import { cn, timeAgo } from "@/lib/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import {
   Inbox, CheckCircle, XCircle, RefreshCw, Mail, Building2,
-  TrendingUp, ThumbsUp, ThumbsDown, AlertCircle, Clock,
+  TrendingUp, ThumbsUp, ThumbsDown, AlertCircle, ChevronLeft, ChevronRight,
 } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
+
+const INBOX_PAGE_SIZE = 20;
 
 const STAGE_LABELS: Record<string, string> = {
   interview_1: "Phone Screen",
@@ -33,11 +34,14 @@ const CONFIDENCE_COLORS = (c?: number) => {
 export default function TrackingPage() {
   const queryClient = useQueryClient();
   const [filter, setFilter] = useState<"all" | "pending" | "approved" | "denied">("pending");
+  const [page, setPage] = useState(0);
 
+  // Fetch without a hard limit — paginate on the client
   const { data: inbox, isLoading, refetch } = useQuery({
-    queryKey: ["inbox", filter],
-    queryFn: () => api.inbox.list({ limit: 50 }),
-    refetchInterval: 30_000,
+    queryKey: ["inbox"],
+    queryFn: () => api.inbox.list({ limit: 500 }),
+    refetchInterval: 60_000,
+    staleTime: 30_000,
   });
 
   const approveMutation = useMutation({
@@ -60,14 +64,26 @@ export default function TrackingPage() {
     onError: () => toast.error("Deny failed"),
   });
 
-  const items = (inbox ?? []).filter((item) => filter === "all" || item.status === filter);
+  const allFiltered = useMemo(
+    () => (inbox ?? []).filter((item) => filter === "all" || item.status === filter),
+    [inbox, filter],
+  );
 
-  const counts = {
+  const totalPages = Math.max(1, Math.ceil(allFiltered.length / INBOX_PAGE_SIZE));
+  const items = useMemo(
+    () => allFiltered.slice(page * INBOX_PAGE_SIZE, (page + 1) * INBOX_PAGE_SIZE),
+    [allFiltered, page],
+  );
+
+  // Reset page when filter changes
+  const setFilterAndReset = (f: typeof filter) => { setFilter(f); setPage(0); };
+
+  const counts = useMemo(() => ({
     all: inbox?.length ?? 0,
     pending: inbox?.filter((i) => i.status === "pending").length ?? 0,
     approved: inbox?.filter((i) => i.status === "approved").length ?? 0,
     denied: inbox?.filter((i) => i.status === "denied").length ?? 0,
-  };
+  }), [inbox]);
 
   return (
     <div className="p-6 space-y-5 max-w-4xl">
@@ -101,7 +117,7 @@ export default function TrackingPage() {
         {(["pending", "all", "approved", "denied"] as const).map((f) => (
           <button
             key={f}
-            onClick={() => setFilter(f)}
+            onClick={() => setFilterAndReset(f)}
             className={cn(
               "px-3 py-1.5 rounded-lg text-sm transition-colors capitalize",
               filter === f
@@ -137,17 +153,47 @@ export default function TrackingPage() {
           </CardContent>
         </Card>
       ) : (
-        <div className="space-y-3">
-          {items.map((item) => (
-            <InboxCard
-              key={item.id}
-              item={item}
-              onApprove={(toStage) => approveMutation.mutate({ id: item.id, toStage })}
-              onDeny={() => denyMutation.mutate(item.id)}
-              loading={approveMutation.isPending || denyMutation.isPending}
-            />
-          ))}
-        </div>
+        <>
+          <div className="space-y-3">
+            {items.map((item) => (
+              <InboxCard
+                key={item.id}
+                item={item}
+                onApprove={(toStage) => approveMutation.mutate({ id: item.id, toStage })}
+                onDeny={() => denyMutation.mutate(item.id)}
+                loading={approveMutation.isPending || denyMutation.isPending}
+              />
+            ))}
+          </div>
+
+          {totalPages > 1 && (
+            <div className="flex items-center justify-between pt-2">
+              <p className="text-xs text-zinc-500">
+                {page * INBOX_PAGE_SIZE + 1}–{Math.min((page + 1) * INBOX_PAGE_SIZE, allFiltered.length)} of {allFiltered.length}
+              </p>
+              <div className="flex items-center gap-1">
+                <Button variant="ghost" size="icon-sm" disabled={page === 0} onClick={() => setPage(page - 1)}>
+                  <ChevronLeft className="h-4 w-4" />
+                </Button>
+                {Array.from({ length: totalPages }, (_, i) => (
+                  <button
+                    key={i}
+                    onClick={() => setPage(i)}
+                    className={cn(
+                      "h-7 w-7 rounded text-xs transition-colors",
+                      i === page ? "bg-zinc-700 text-white font-medium" : "text-zinc-500 hover:bg-zinc-800"
+                    )}
+                  >
+                    {i + 1}
+                  </button>
+                ))}
+                <Button variant="ghost" size="icon-sm" disabled={page >= totalPages - 1} onClick={() => setPage(page + 1)}>
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          )}
+        </>
       )}
 
       {/* Stats summary */}

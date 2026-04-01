@@ -3,20 +3,23 @@
 import { useState, useEffect } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
-import { loadProfile, saveProfile } from "@/lib/profile-store";
-import type { SearchPreferences } from "@/lib/profile-store";
+import {
+  loadProfile, saveProfile, saveSearch, deleteSavedSearch,
+  type SearchPreferences, type SavedSearch, DEFAULT_SEARCH_PREFS,
+} from "@/lib/profile-store";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
 import {
-  Search, MapPin, DollarSign, Briefcase, X, Plus,
-  Play, Save, SlidersHorizontal, Building2, Globe,
-  AlertCircle, Zap, CheckCircle,
+  Search, MapPin, DollarSign, X, Plus, Play, Save,
+  SlidersHorizontal, Building2, Globe, Zap, Bookmark,
+  Trash2, Clock, ChevronDown, ChevronUp, Navigation,
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { format } from "date-fns";
 
 const ALL_SOURCES = [
   { id: "linkedin", label: "LinkedIn" },
@@ -51,22 +54,30 @@ const EXP_LEVELS = [
   { value: "lead", label: "Lead / Principal" },
 ] as const;
 
+const RADIUS_OPTIONS = [5, 10, 15, 25, 50, 100];
+
 export default function SearchPage() {
   const queryClient = useQueryClient();
   const [prefs, setPrefs] = useState<SearchPreferences | null>(null);
+  const [savedSearches, setSavedSearches] = useState<SavedSearch[]>([]);
   const [dirty, setDirty] = useState(false);
-  const [selectedSources, setSelectedSources] = useState<Set<string>>(new Set(ALL_SOURCES.map((s) => s.id)));
+  const [selectedSources, setSelectedSources] = useState<Set<string>>(
+    new Set(ALL_SOURCES.map((s) => s.id))
+  );
   const [kwInput, setKwInput] = useState("");
   const [locInput, setLocInput] = useState("");
+  const [zipInput, setZipInput] = useState("");
   const [bkKwInput, setBkKwInput] = useState("");
   const [bkCoInput, setBkCoInput] = useState("");
   const [topN, setTopN] = useState(20);
   const [running, setRunning] = useState(false);
+  const [saveName, setSaveName] = useState("");
+  const [showSaves, setShowSaves] = useState(false);
 
   useEffect(() => {
     const p = loadProfile();
-    setPrefs(p.searchPrefs);
-    setSelectedSources(new Set(ALL_SOURCES.map((s) => s.id)));
+    setPrefs({ ...DEFAULT_SEARCH_PREFS, ...p.searchPrefs });
+    setSavedSearches(p.savedSearches ?? []);
   }, []);
 
   const update = (patch: Partial<SearchPreferences>) => {
@@ -74,63 +85,74 @@ export default function SearchPage() {
     setDirty(true);
   };
 
+  const persistPrefs = (p: SearchPreferences) => {
+    const profile = loadProfile();
+    profile.searchPrefs = p;
+    saveProfile(profile);
+  };
+
   const save = () => {
     if (!prefs) return;
-    const p = loadProfile();
-    p.searchPrefs = prefs;
-    saveProfile(p);
+    persistPrefs(prefs);
     setDirty(false);
     toast.success("Search preferences saved");
   };
 
-  const addKeyword = (kw: string) => {
-    if (!kw.trim()) return;
-    update({ keywords: [...(prefs?.keywords ?? []), kw.trim()] });
-    setKwInput("");
+  const handleSaveSearch = () => {
+    if (!prefs || !saveName.trim()) { toast.error("Enter a name for this search"); return; }
+    const entry = saveSearch(saveName.trim(), prefs);
+    setSavedSearches((prev) => [entry, ...prev]);
+    setSaveName("");
+    toast.success(`Saved search "${entry.name}"`);
   };
 
-  const addLocation = (loc: string) => {
-    if (!loc.trim()) return;
-    update({ locations: [...(prefs?.locations ?? []), loc.trim()] });
-    setLocInput("");
+  const handleLoadSearch = (ss: SavedSearch) => {
+    setPrefs({ ...DEFAULT_SEARCH_PREFS, ...ss.prefs });
+    setDirty(true);
+    toast.success(`Loaded "${ss.name}"`);
   };
 
-  const addBlacklistKw = (kw: string) => {
-    if (!kw.trim()) return;
-    update({ blacklistedKeywords: [...(prefs?.blacklistedKeywords ?? []), kw.trim()] });
-    setBkKwInput("");
+  const handleDeleteSearch = (id: string, name: string) => {
+    deleteSavedSearch(id);
+    setSavedSearches((prev) => prev.filter((s) => s.id !== id));
+    toast.info(`Deleted "${name}"`);
   };
 
-  const addBlacklistCo = (co: string) => {
-    if (!co.trim()) return;
-    update({ blacklistedCompanies: [...(prefs?.blacklistedCompanies ?? []), co.trim()] });
-    setBkCoInput("");
+  const addTag = (
+    field: "keywords" | "locations" | "zipCodes" | "blacklistedKeywords" | "blacklistedCompanies",
+    value: string,
+    clear: () => void,
+  ) => {
+    if (!value.trim()) return;
+    update({ [field]: [...(prefs?.[field] ?? []), value.trim()] });
+    clear();
   };
+
+  const removeTag = (
+    field: "keywords" | "locations" | "zipCodes" | "blacklistedKeywords" | "blacklistedCompanies",
+    value: string,
+  ) => update({ [field]: (prefs?.[field] ?? []).filter((v) => v !== value) });
 
   const toggleArray = <T,>(arr: T[], val: T): T[] =>
     arr.includes(val) ? arr.filter((x) => x !== val) : [...arr, val];
 
   const runSearch = async () => {
     if (!prefs) return;
-    if (prefs.keywords.length === 0) {
-      toast.error("Add at least one keyword before searching");
+    if (prefs.keywords.length === 0 && prefs.zipCodes.length === 0) {
+      toast.error("Add at least one keyword or zip code before searching");
       return;
     }
     setRunning(true);
     try {
-      // Save preferences first so they persist for future runs
-      const p = loadProfile();
-      p.searchPrefs = prefs;
-      saveProfile(p);
-
+      persistPrefs(prefs);
+      setDirty(false);
       await api.search.run({
         keywords: prefs.keywords,
         locations: prefs.locations,
         sources: [...selectedSources],
         topN,
-        minScore: prefs.salaryMin ? 50 : 50,
+        minScore: 50,
         remoteOnly: prefs.remotePreference === "remote",
-        // Full prefs synced as scoring hints to job-ops before the run
         prefs: {
           salaryMin: prefs.salaryMin,
           salaryMax: prefs.salaryMax,
@@ -140,9 +162,11 @@ export default function SearchPage() {
           requireVisaSupport: prefs.requireVisaSupport,
           jobTypes: prefs.jobTypes,
           experienceLevels: prefs.experienceLevels,
+          zipCodes: prefs.zipCodes,
+          radiusMiles: prefs.radiusMiles,
         },
       });
-      toast.success("Search started — salary, blacklists & filters synced to scorer");
+      toast.success("Search started — jobs will appear in the Jobs page shortly");
       queryClient.invalidateQueries({ queryKey: ["jobs"] });
       queryClient.invalidateQueries({ queryKey: ["pipeline-status"] });
     } catch (err: unknown) {
@@ -153,27 +177,30 @@ export default function SearchPage() {
     }
   };
 
-  if (!prefs) return (
-    <div className="p-6 space-y-4 max-w-3xl">
-      {Array.from({ length: 3 }).map((_, i) => (
-        <div key={i} className="h-40 bg-zinc-800/40 rounded-xl animate-pulse" />
-      ))}
-    </div>
-  );
+  if (!prefs) {
+    return (
+      <div className="p-6 space-y-4 max-w-3xl">
+        {Array.from({ length: 4 }).map((_, i) => (
+          <div key={i} className="h-40 bg-zinc-800/40 rounded-xl animate-pulse" />
+        ))}
+      </div>
+    );
+  }
 
   return (
     <div className="p-6 space-y-5 max-w-3xl">
+      {/* Header */}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-xl font-bold text-white">Job Search</h1>
           <p className="text-sm text-zinc-400 mt-0.5">
-            Configure keywords, locations and filters — then run the search
+            Configure keywords, locations, zip codes and filters — then run
           </p>
         </div>
         <div className="flex items-center gap-2">
           {dirty && (
             <Button variant="outline" size="sm" onClick={save}>
-              <Save className="h-3.5 w-3.5" /> Save preferences
+              <Save className="h-3.5 w-3.5" /> Save prefs
             </Button>
           )}
           <Button onClick={runSearch} disabled={running} size="sm" className="gap-1.5">
@@ -184,105 +211,214 @@ export default function SearchPage() {
         </div>
       </div>
 
+      {/* Saved searches panel */}
+      <Card>
+        <button
+          className="w-full flex items-center justify-between px-5 py-3.5 hover:bg-zinc-800/20 transition-colors rounded-xl"
+          onClick={() => setShowSaves(!showSaves)}
+        >
+          <span className="flex items-center gap-2 text-sm font-medium text-zinc-200">
+            <Bookmark className="h-4 w-4 text-zinc-400" />
+            Saved searches
+            {savedSearches.length > 0 && (
+              <span className="text-xs text-zinc-500 font-normal">{savedSearches.length}</span>
+            )}
+          </span>
+          {showSaves ? <ChevronUp className="h-4 w-4 text-zinc-500" /> : <ChevronDown className="h-4 w-4 text-zinc-500" />}
+        </button>
+
+        {showSaves && (
+          <CardContent className="pt-0 space-y-3 border-t border-zinc-800">
+            {/* Save current as named search */}
+            <div className="flex gap-2 pt-4">
+              <Input
+                value={saveName}
+                onChange={(e) => setSaveName(e.target.value)}
+                placeholder="Name this search (e.g. Senior React London)…"
+                onKeyDown={(e) => e.key === "Enter" && handleSaveSearch()}
+                className="flex-1"
+              />
+              <Button variant="outline" onClick={handleSaveSearch}>
+                <Bookmark className="h-3.5 w-3.5" /> Save
+              </Button>
+            </div>
+
+            {savedSearches.length === 0 ? (
+              <p className="text-xs text-zinc-600 text-center py-3 italic">No saved searches yet</p>
+            ) : (
+              <div className="space-y-1.5">
+                {savedSearches.map((ss) => (
+                  <div
+                    key={ss.id}
+                    className="flex items-start gap-3 rounded-lg border border-zinc-800 px-3 py-2.5 hover:border-zinc-700 transition-colors"
+                  >
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-zinc-200">{ss.name}</p>
+                      <p className="text-xs text-zinc-500 mt-0.5 truncate">
+                        {[
+                          ss.prefs.keywords.slice(0, 3).join(", "),
+                          ss.prefs.locations.slice(0, 2).join(", "),
+                          ss.prefs.zipCodes?.slice(0, 2).join(", "),
+                        ].filter(Boolean).join(" · ") || "No keywords"}
+                      </p>
+                      <p className="text-xs text-zinc-600 mt-0.5 flex items-center gap-1">
+                        <Clock className="h-3 w-3" /> {format(ss.createdAt, "MMM d, yyyy")}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-1 shrink-0">
+                      <Button
+                        variant="ghost" size="sm"
+                        onClick={() => handleLoadSearch(ss)}
+                        className="text-xs text-zinc-400 hover:text-zinc-100"
+                      >
+                        Load
+                      </Button>
+                      <Button
+                        variant="ghost" size="icon-sm"
+                        onClick={() => handleDeleteSearch(ss.id, ss.name)}
+                        className="text-zinc-600 hover:text-red-400"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        )}
+      </Card>
+
       {/* Keywords */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Search className="h-4 w-4" /> Keywords
-          </CardTitle>
+          <CardTitle className="flex items-center gap-2"><Search className="h-4 w-4" /> Keywords</CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
-          <p className="text-xs text-zinc-400">
-            Job titles, technologies, or skills to search for. The more specific, the better the results.
-          </p>
+          <p className="text-xs text-zinc-400">Job titles, technologies, or skills to search for.</p>
           <div className="flex gap-2">
             <Input
               value={kwInput}
               onChange={(e) => setKwInput(e.target.value)}
-              placeholder="e.g. Software Engineer, React Developer, Python…"
-              onKeyDown={(e) => e.key === "Enter" && addKeyword(kwInput)}
+              placeholder="e.g. Software Engineer, React Developer…"
+              onKeyDown={(e) => e.key === "Enter" && addTag("keywords", kwInput, () => setKwInput(""))}
               className="flex-1"
             />
-            <Button variant="outline" onClick={() => addKeyword(kwInput)}>
+            <Button variant="outline" onClick={() => addTag("keywords", kwInput, () => setKwInput(""))}>
               <Plus className="h-4 w-4" />
             </Button>
           </div>
-          <div className="flex flex-wrap gap-2">
-            {prefs.keywords.map((kw) => (
-              <span key={kw} className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-blue-900/30 border border-blue-700/50 text-xs text-blue-300">
-                {kw}
-                <button onClick={() => update({ keywords: prefs.keywords.filter((k) => k !== kw) })} className="hover:text-white">
-                  <X className="h-3 w-3" />
-                </button>
-              </span>
+          <TagList
+            tags={prefs.keywords}
+            onRemove={(t) => removeTag("keywords", t)}
+            color="bg-blue-900/30 border-blue-700/50 text-blue-300"
+          />
+          <div className="flex flex-wrap gap-1.5">
+            {["Software Engineer", "Full Stack Developer", "Frontend Engineer", "Data Engineer",
+              "DevOps Engineer", "Product Manager", "UX Designer", "Backend Engineer"].map((s) => (
+              <button
+                key={s}
+                onClick={() => { if (!prefs.keywords.includes(s)) addTag("keywords", s, () => {}); }}
+                disabled={prefs.keywords.includes(s)}
+                className={cn(
+                  "px-2.5 py-1 rounded-full text-xs border transition-colors",
+                  prefs.keywords.includes(s)
+                    ? "border-zinc-700 text-zinc-600 cursor-not-allowed"
+                    : "border-zinc-700 text-zinc-400 hover:border-zinc-500 hover:text-zinc-200 cursor-pointer"
+                )}
+              >{s}</button>
             ))}
-            {prefs.keywords.length === 0 && (
-              <p className="text-xs text-zinc-600 italic">No keywords yet</p>
-            )}
-          </div>
-
-          {/* Suggestions */}
-          <div>
-            <p className="text-xs text-zinc-600 mb-1.5">Suggestions:</p>
-            <div className="flex flex-wrap gap-1.5">
-              {["Software Engineer", "Full Stack Developer", "Frontend Engineer", "Data Engineer", "DevOps Engineer", "Product Manager", "UX Designer"].map((s) => (
-                <button
-                  key={s}
-                  onClick={() => { if (!prefs.keywords.includes(s)) addKeyword(s); }}
-                  disabled={prefs.keywords.includes(s)}
-                  className={cn(
-                    "px-2.5 py-1 rounded-full text-xs border transition-colors",
-                    prefs.keywords.includes(s)
-                      ? "border-zinc-700 text-zinc-600 cursor-not-allowed"
-                      : "border-zinc-700 text-zinc-400 hover:border-zinc-500 hover:text-zinc-200 cursor-pointer"
-                  )}
-                >
-                  {s}
-                </button>
-              ))}
-            </div>
           </div>
         </CardContent>
       </Card>
 
-      {/* Locations */}
+      {/* Locations + Zip codes */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <MapPin className="h-4 w-4" /> Locations
-          </CardTitle>
+          <CardTitle className="flex items-center gap-2"><MapPin className="h-4 w-4" /> Locations & Zip Codes</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-3">
-          <p className="text-xs text-zinc-400">
-            Cities, regions, or countries. Leave empty to search globally.
-          </p>
-          <div className="flex gap-2">
-            <Input
-              value={locInput}
-              onChange={(e) => setLocInput(e.target.value)}
-              placeholder="e.g. London, Manchester, Remote UK…"
-              onKeyDown={(e) => e.key === "Enter" && addLocation(locInput)}
-              className="flex-1"
+        <CardContent className="space-y-4">
+          {/* City/region */}
+          <div>
+            <p className="text-xs text-zinc-400 mb-2">Cities or regions</p>
+            <div className="flex gap-2">
+              <Input
+                value={locInput}
+                onChange={(e) => setLocInput(e.target.value)}
+                placeholder="e.g. London, New York, Remote UK…"
+                onKeyDown={(e) => e.key === "Enter" && addTag("locations", locInput, () => setLocInput(""))}
+                className="flex-1"
+              />
+              <Button variant="outline" onClick={() => addTag("locations", locInput, () => setLocInput(""))}>
+                <Plus className="h-4 w-4" />
+              </Button>
+            </div>
+            <TagList
+              tags={prefs.locations}
+              onRemove={(t) => removeTag("locations", t)}
+              icon={<MapPin className="h-3 w-3" />}
+              color="bg-zinc-800 border-zinc-700 text-zinc-300"
             />
-            <Button variant="outline" onClick={() => addLocation(locInput)}>
-              <Plus className="h-4 w-4" />
-            </Button>
           </div>
-          <div className="flex flex-wrap gap-2">
-            {prefs.locations.map((loc) => (
-              <span key={loc} className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-zinc-800 border border-zinc-700 text-xs text-zinc-300">
-                <MapPin className="h-3 w-3" /> {loc}
-                <button onClick={() => update({ locations: prefs.locations.filter((l) => l !== loc) })} className="hover:text-white">
-                  <X className="h-3 w-3" />
-                </button>
+
+          <Separator />
+
+          {/* Zip / postal codes */}
+          <div>
+            <div className="flex items-center gap-2 mb-2">
+              <Navigation className="h-3.5 w-3.5 text-zinc-400" />
+              <p className="text-xs text-zinc-400">Zip / postal codes</p>
+              <span className="text-xs text-zinc-600 ml-auto">
+                Searches within radius of each code
               </span>
-            ))}
-            {prefs.locations.length === 0 && (
-              <p className="text-xs text-zinc-600 italic">No locations (all locations will be searched)</p>
+            </div>
+            <div className="flex gap-2">
+              <Input
+                value={zipInput}
+                onChange={(e) => setZipInput(e.target.value)}
+                placeholder="e.g. SW1A 1AA, 10001, EC1A 1BB…"
+                onKeyDown={(e) => e.key === "Enter" && addTag("zipCodes", zipInput, () => setZipInput(""))}
+                className="flex-1 font-mono"
+              />
+              <Button variant="outline" onClick={() => addTag("zipCodes", zipInput, () => setZipInput(""))}>
+                <Plus className="h-4 w-4" />
+              </Button>
+            </div>
+            <TagList
+              tags={prefs.zipCodes}
+              onRemove={(t) => removeTag("zipCodes", t)}
+              icon={<Navigation className="h-3 w-3" />}
+              color="bg-purple-900/30 border-purple-700/50 text-purple-300"
+            />
+            {prefs.zipCodes.length > 0 && (
+              <div className="mt-3">
+                <div className="flex items-center justify-between mb-1.5">
+                  <p className="text-xs text-zinc-400">Search radius</p>
+                  <span className="text-xs font-medium text-zinc-300">{prefs.radiusMiles} miles</span>
+                </div>
+                <div className="flex gap-2 flex-wrap">
+                  {RADIUS_OPTIONS.map((r) => (
+                    <button
+                      key={r}
+                      onClick={() => update({ radiusMiles: r })}
+                      className={cn(
+                        "px-3 py-1 rounded-full text-xs border transition-colors",
+                        prefs.radiusMiles === r
+                          ? "border-zinc-400 bg-zinc-700 text-zinc-100 font-medium"
+                          : "border-zinc-700 text-zinc-400 hover:border-zinc-600"
+                      )}
+                    >
+                      {r}mi
+                    </button>
+                  ))}
+                </div>
+              </div>
             )}
           </div>
 
-          {/* Remote preference */}
+          <Separator />
+
+          {/* Work arrangement */}
           <div>
             <p className="text-xs text-zinc-400 mb-2">Work arrangement</p>
             <div className="flex gap-2 flex-wrap">
@@ -296,9 +432,7 @@ export default function SearchPage() {
                       ? "border-zinc-500 bg-zinc-800 text-zinc-100 font-medium"
                       : "border-zinc-700 text-zinc-400 hover:border-zinc-600"
                   )}
-                >
-                  {opt.label}
-                </button>
+                >{opt.label}</button>
               ))}
             </div>
           </div>
@@ -308,9 +442,7 @@ export default function SearchPage() {
       {/* Salary & job type */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <DollarSign className="h-4 w-4" /> Salary & Job Type
-          </CardTitle>
+          <CardTitle className="flex items-center gap-2"><DollarSign className="h-4 w-4" /> Salary & Job Type</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-3 gap-3">
@@ -359,9 +491,7 @@ export default function SearchPage() {
                       ? "border-zinc-500 bg-zinc-800 text-zinc-100 font-medium"
                       : "border-zinc-700 text-zinc-400 hover:border-zinc-600"
                   )}
-                >
-                  {jt.label}
-                </button>
+                >{jt.label}</button>
               ))}
             </div>
           </div>
@@ -379,9 +509,7 @@ export default function SearchPage() {
                       ? "border-zinc-500 bg-zinc-800 text-zinc-100 font-medium"
                       : "border-zinc-700 text-zinc-400 hover:border-zinc-600"
                   )}
-                >
-                  {el.label}
-                </button>
+                >{el.label}</button>
               ))}
             </div>
           </div>
@@ -393,10 +521,7 @@ export default function SearchPage() {
               <p className="text-sm text-zinc-200">Require visa sponsorship</p>
               <p className="text-xs text-zinc-500 mt-0.5">Only show jobs from visa-sponsoring employers</p>
             </div>
-            <Switch
-              checked={prefs.requireVisaSupport}
-              onCheckedChange={(v) => update({ requireVisaSupport: v })}
-            />
+            <Switch checked={prefs.requireVisaSupport} onCheckedChange={(v) => update({ requireVisaSupport: v })} />
           </div>
         </CardContent>
       </Card>
@@ -405,9 +530,7 @@ export default function SearchPage() {
       <Card>
         <CardHeader>
           <div className="flex items-center justify-between">
-            <CardTitle className="flex items-center gap-2">
-              <Globe className="h-4 w-4" /> Job Boards
-            </CardTitle>
+            <CardTitle className="flex items-center gap-2"><Globe className="h-4 w-4" /> Job Boards</CardTitle>
             <div className="flex gap-1">
               <Button variant="ghost" size="sm" onClick={() => setSelectedSources(new Set(ALL_SOURCES.map((s) => s.id)))}>All</Button>
               <Button variant="ghost" size="sm" onClick={() => setSelectedSources(new Set())}>None</Button>
@@ -451,43 +574,34 @@ export default function SearchPage() {
         </CardHeader>
         <CardContent className="space-y-4">
           <div>
-            <p className="text-xs text-zinc-400 mb-2">Keywords to skip (in title or description)</p>
+            <p className="text-xs text-zinc-400 mb-2">Keywords to skip</p>
             <div className="flex gap-2 mb-2">
               <Input value={bkKwInput} onChange={(e) => setBkKwInput(e.target.value)}
                 placeholder="e.g. internship, junior, sales…"
-                onKeyDown={(e) => e.key === "Enter" && addBlacklistKw(bkKwInput)} className="flex-1" />
-              <Button variant="outline" onClick={() => addBlacklistKw(bkKwInput)}><Plus className="h-4 w-4" /></Button>
+                onKeyDown={(e) => e.key === "Enter" && addTag("blacklistedKeywords", bkKwInput, () => setBkKwInput(""))}
+                className="flex-1" />
+              <Button variant="outline" onClick={() => addTag("blacklistedKeywords", bkKwInput, () => setBkKwInput(""))}>
+                <Plus className="h-4 w-4" />
+              </Button>
             </div>
-            <div className="flex flex-wrap gap-1.5">
-              {prefs.blacklistedKeywords.map((kw) => (
-                <span key={kw} className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-red-900/20 border border-red-800/40 text-xs text-red-300">
-                  {kw}
-                  <button onClick={() => update({ blacklistedKeywords: prefs.blacklistedKeywords.filter((k) => k !== kw) })}><X className="h-3 w-3" /></button>
-                </span>
-              ))}
-              {prefs.blacklistedKeywords.length === 0 && <p className="text-xs text-zinc-600 italic">None</p>}
-            </div>
+            <TagList tags={prefs.blacklistedKeywords} onRemove={(t) => removeTag("blacklistedKeywords", t)}
+              color="bg-red-900/20 border-red-800/40 text-red-300" />
           </div>
-
           <Separator />
-
           <div>
             <p className="text-xs text-zinc-400 mb-2">Companies to skip</p>
             <div className="flex gap-2 mb-2">
               <Input value={bkCoInput} onChange={(e) => setBkCoInput(e.target.value)}
                 placeholder="e.g. Company Name…"
-                onKeyDown={(e) => e.key === "Enter" && addBlacklistCo(bkCoInput)} className="flex-1" />
-              <Button variant="outline" onClick={() => addBlacklistCo(bkCoInput)}><Plus className="h-4 w-4" /></Button>
+                onKeyDown={(e) => e.key === "Enter" && addTag("blacklistedCompanies", bkCoInput, () => setBkCoInput(""))}
+                className="flex-1" />
+              <Button variant="outline" onClick={() => addTag("blacklistedCompanies", bkCoInput, () => setBkCoInput(""))}>
+                <Plus className="h-4 w-4" />
+              </Button>
             </div>
-            <div className="flex flex-wrap gap-1.5">
-              {prefs.blacklistedCompanies.map((co) => (
-                <span key={co} className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-red-900/20 border border-red-800/40 text-xs text-red-300">
-                  <Building2 className="h-3 w-3" /> {co}
-                  <button onClick={() => update({ blacklistedCompanies: prefs.blacklistedCompanies.filter((c) => c !== co) })}><X className="h-3 w-3" /></button>
-                </span>
-              ))}
-              {prefs.blacklistedCompanies.length === 0 && <p className="text-xs text-zinc-600 italic">None</p>}
-            </div>
+            <TagList tags={prefs.blacklistedCompanies} onRemove={(t) => removeTag("blacklistedCompanies", t)}
+              icon={<Building2 className="h-3 w-3" />}
+              color="bg-red-900/20 border-red-800/40 text-red-300" />
           </div>
         </CardContent>
       </Card>
@@ -495,35 +609,66 @@ export default function SearchPage() {
       {/* Run config */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <SlidersHorizontal className="h-4 w-4" /> Run Settings
-          </CardTitle>
+          <CardTitle className="flex items-center gap-2"><SlidersHorizontal className="h-4 w-4" /> Run Settings</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent>
           <div>
             <label className="text-xs text-zinc-400 mb-1.5 block">Jobs per source (topN)</label>
-            <Input type="number" min={1} max={50} value={topN} onChange={(e) => setTopN(Number(e.target.value))} className="w-32" />
-            <p className="text-xs text-zinc-600 mt-1">Max {topN * selectedSources.size} jobs from {selectedSources.size} source{selectedSources.size !== 1 ? "s" : ""}</p>
+            <Input type="number" min={1} max={50} value={topN}
+              onChange={(e) => setTopN(Number(e.target.value))} className="w-32" />
+            <p className="text-xs text-zinc-600 mt-1">
+              Up to {topN * selectedSources.size} total from {selectedSources.size} source{selectedSources.size !== 1 ? "s" : ""}
+            </p>
           </div>
         </CardContent>
       </Card>
 
-      {/* Run button */}
+      {/* Run CTA */}
       <div className="flex items-center gap-3 rounded-xl border border-zinc-800 bg-zinc-900/40 p-4">
         <div className="flex-1">
           <p className="text-sm font-medium text-zinc-200">Ready to search</p>
           <p className="text-xs text-zinc-500 mt-0.5">
             {prefs.keywords.length} keyword{prefs.keywords.length !== 1 ? "s" : ""} ·{" "}
-            {prefs.locations.length > 0 ? prefs.locations.join(", ") : "all locations"} ·{" "}
+            {prefs.locations.length + prefs.zipCodes.length > 0
+              ? [...prefs.locations, ...prefs.zipCodes].join(", ")
+              : "all locations"} ·{" "}
             {selectedSources.size} source{selectedSources.size !== 1 ? "s" : ""}
           </p>
         </div>
-        <Button onClick={runSearch} disabled={running || prefs.keywords.length === 0} className="gap-1.5">
+        <Button
+          onClick={runSearch}
+          disabled={running || (prefs.keywords.length === 0 && prefs.zipCodes.length === 0)}
+          className="gap-1.5"
+        >
           {running
             ? <><span className="h-3.5 w-3.5 rounded-full border-2 border-zinc-400 border-t-transparent animate-spin" /> Searching…</>
             : <><Zap className="h-3.5 w-3.5" /> Search Jobs</>}
         </Button>
       </div>
+    </div>
+  );
+}
+
+// ─── Reusable tag list ────────────────────────────────────────────────────────
+function TagList({
+  tags, onRemove, color, icon,
+}: {
+  tags: string[];
+  onRemove: (t: string) => void;
+  color: string;
+  icon?: React.ReactNode;
+}) {
+  if (tags.length === 0) return null;
+  return (
+    <div className="flex flex-wrap gap-1.5 mt-2">
+      {tags.map((t) => (
+        <span key={t} className={cn("flex items-center gap-1.5 px-2.5 py-1 rounded-full border text-xs", color)}>
+          {icon} {t}
+          <button onClick={() => onRemove(t)} className="hover:text-white ml-0.5">
+            <X className="h-3 w-3" />
+          </button>
+        </span>
+      ))}
     </div>
   );
 }

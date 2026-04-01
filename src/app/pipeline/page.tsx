@@ -77,7 +77,10 @@ export default function PipelinePage() {
           setLiveLog((prev) => [...prev.slice(-99), msg]);
           if (logRef.current) logRef.current.scrollTop = logRef.current.scrollHeight;
         }
-      } catch {}
+      } catch (e) {
+        // SSE message was not valid JSON — skip silently but log in dev
+        if (process.env.NODE_ENV === "development") console.warn("[SSE parse]", e);
+      }
     };
 
     es.onerror = () => es.close();
@@ -303,21 +306,69 @@ export default function PipelinePage() {
       <AutomationScheduler />
 
       {/* Run history */}
-      <Card>
-        <CardHeader><CardTitle className="flex items-center gap-2"><Clock className="h-4 w-4" /> Run History</CardTitle></CardHeader>
-        <CardContent>
-          {(!runs || runs.length === 0) ? (
-            <p className="text-sm text-zinc-500 text-center py-4">No runs yet.</p>
-          ) : (
+      <RunHistory runs={runs ?? []} />
+    </div>
+  );
+}
+
+const RUNS_PAGE_SIZE = 10;
+
+function RunHistory({ runs }: { runs: PipelineRun[] }) {
+  const [page, setPage] = useState(0);
+  const totalPages = Math.max(1, Math.ceil(runs.length / RUNS_PAGE_SIZE));
+  const pageRuns = runs.slice(page * RUNS_PAGE_SIZE, (page + 1) * RUNS_PAGE_SIZE);
+
+  return (
+    <Card>
+      <CardHeader>
+        <div className="flex items-center justify-between">
+          <CardTitle className="flex items-center gap-2">
+            <Clock className="h-4 w-4" /> Run History
+          </CardTitle>
+          <span className="text-xs text-zinc-500">{runs.length} total</span>
+        </div>
+      </CardHeader>
+      <CardContent>
+        {runs.length === 0 ? (
+          <p className="text-sm text-zinc-500 text-center py-4">No runs yet.</p>
+        ) : (
+          <>
             <div className="space-y-1">
-              {runs.map((run) => (
+              {pageRuns.map((run) => (
                 <RunRow key={run.id} run={run} />
               ))}
             </div>
-          )}
-        </CardContent>
-      </Card>
-    </div>
+            {totalPages > 1 && (
+              <div className="flex items-center justify-between mt-3 pt-3 border-t border-zinc-800">
+                <span className="text-xs text-zinc-500">
+                  {page * RUNS_PAGE_SIZE + 1}–{Math.min((page + 1) * RUNS_PAGE_SIZE, runs.length)} of {runs.length}
+                </span>
+                <div className="flex gap-1">
+                  <Button variant="ghost" size="icon-sm" disabled={page === 0} onClick={() => setPage(page - 1)}>
+                    <ChevronDown className="h-3.5 w-3.5 rotate-90" />
+                  </Button>
+                  {Array.from({ length: totalPages }, (_, i) => (
+                    <button
+                      key={i}
+                      onClick={() => setPage(i)}
+                      className={cn(
+                        "h-7 w-7 rounded text-xs transition-colors",
+                        i === page ? "bg-zinc-700 text-white font-medium" : "text-zinc-500 hover:bg-zinc-800"
+                      )}
+                    >
+                      {i + 1}
+                    </button>
+                  ))}
+                  <Button variant="ghost" size="icon-sm" disabled={page >= totalPages - 1} onClick={() => setPage(page + 1)}>
+                    <ChevronDown className="h-3.5 w-3.5 -rotate-90" />
+                  </Button>
+                </div>
+              </div>
+            )}
+          </>
+        )}
+      </CardContent>
+    </Card>
   );
 }
 
@@ -379,7 +430,9 @@ function AutomationScheduler() {
         setEnabled(e);
         setSchedule(cron);
       }
-    } catch {}
+    } catch (e) {
+      if (process.env.NODE_ENV === "development") console.warn("[schedule load]", e);
+    }
   }, []);
 
   // Persist cron preference locally AND push to job-ops settings so the
@@ -392,8 +445,9 @@ function AutomationScheduler() {
       // this call future-proofs it: when they add it, we're already sending it.
       await api.settings.patch({ ...(enabled ? { cronSchedule: schedule } : { cronSchedule: null }) } as Parameters<typeof api.settings.patch>[0]);
       toast.success(enabled ? `Schedule saved: ${schedule}` : "Schedule disabled");
-    } catch {
+    } catch (e) {
       // Settings patch may 422 for unknown fields — still save locally
+      if (process.env.NODE_ENV === "development") console.warn("[schedule save]", e);
       localStorage.setItem("jobops_schedule", JSON.stringify({ enabled, cron: schedule }));
       toast.success("Saved locally — use one of the snippets below to wire to your host");
     } finally {

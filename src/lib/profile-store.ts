@@ -44,12 +44,16 @@ export interface PersonalInfo {
   portfolioUrl?: string;
   summary?: string;
   nationality?: string;
-  rightToWork?: string;   // e.g. "UK citizen", "Requires sponsorship"
+  rightToWork?: string;
 }
 
 export interface SearchPreferences {
   keywords: string[];
   locations: string[];
+  /** Zip / postal codes for radius-based search (e.g. "SW1A 1AA", "10001") */
+  zipCodes: string[];
+  /** Miles or km radius around each zip code */
+  radiusMiles: number;
   remotePreference: "any" | "remote" | "hybrid" | "onsite";
   jobTypes: ("full_time" | "part_time" | "contract" | "internship")[];
   salaryMin?: number;
@@ -63,12 +67,20 @@ export interface SearchPreferences {
   requireVisaSupport: boolean;
 }
 
+/** A named snapshot of SearchPreferences that can be quickly loaded */
+export interface SavedSearch {
+  id: string;
+  name: string;
+  createdAt: number;
+  prefs: SearchPreferences;
+}
+
 export interface AutoApplySettings {
   enabled: boolean;
-  requireReview: boolean;        // pause for human review before submitting
+  requireReview: boolean;
   coverLetterEnabled: boolean;
   coverLetterStyle: "formal" | "casual" | "concise";
-  autoSkipBelow: number;         // score threshold
+  autoSkipBelow: number;
   maxDailyApplications: number;
   excludeStatuses: string[];
   customAnswers: { question: string; answer: string }[];
@@ -77,7 +89,7 @@ export interface AutoApplySettings {
 export interface ResumeFile {
   name: string;
   uploadedAt: number;
-  dataUrl?: string;   // base64 for preview
+  dataUrl?: string;
   rxresumeId?: string;
 }
 
@@ -87,12 +99,29 @@ export interface Profile {
   education: Education[];
   skills: Skill[];
   searchPrefs: SearchPreferences;
+  savedSearches: SavedSearch[];
   autoApply: AutoApplySettings;
   resume?: ResumeFile;
   lastUpdated: number;
 }
 
 const KEY = "jobops_profile_v1";
+
+export const DEFAULT_SEARCH_PREFS: SearchPreferences = {
+  keywords: [],
+  locations: [],
+  zipCodes: [],
+  radiusMiles: 25,
+  remotePreference: "any",
+  jobTypes: ["full_time"],
+  salaryCurrency: "GBP",
+  experienceLevels: ["mid", "senior"],
+  companySizes: ["startup", "mid", "enterprise"],
+  blacklistedKeywords: [],
+  blacklistedCompanies: [],
+  requireSponsor: false,
+  requireVisaSupport: false,
+};
 
 export const DEFAULT_PROFILE: Profile = {
   personal: {
@@ -109,19 +138,8 @@ export const DEFAULT_PROFILE: Profile = {
   experience: [],
   education: [],
   skills: [],
-  searchPrefs: {
-    keywords: [],
-    locations: [],
-    remotePreference: "any",
-    jobTypes: ["full_time"],
-    salaryCurrency: "GBP",
-    experienceLevels: ["mid", "senior"],
-    companySizes: ["startup", "mid", "enterprise"],
-    blacklistedKeywords: [],
-    blacklistedCompanies: [],
-    requireSponsor: false,
-    requireVisaSupport: false,
-  },
+  searchPrefs: { ...DEFAULT_SEARCH_PREFS },
+  savedSearches: [],
   autoApply: {
     enabled: false,
     requireReview: true,
@@ -139,8 +157,17 @@ export function loadProfile(): Profile {
   try {
     const raw = localStorage.getItem(KEY);
     if (!raw) return structuredClone(DEFAULT_PROFILE);
-    return { ...structuredClone(DEFAULT_PROFILE), ...JSON.parse(raw) };
-  } catch {
+    const parsed = JSON.parse(raw) as Partial<Profile>;
+    // Merge defaults so new fields (zipCodes, radiusMiles, savedSearches) appear
+    // even in profiles saved before they were added.
+    return {
+      ...structuredClone(DEFAULT_PROFILE),
+      ...parsed,
+      searchPrefs: { ...DEFAULT_SEARCH_PREFS, ...(parsed.searchPrefs ?? {}) },
+      savedSearches: parsed.savedSearches ?? [],
+    };
+  } catch (e) {
+    if (process.env.NODE_ENV === "development") console.warn("[loadProfile]", e);
     return structuredClone(DEFAULT_PROFILE);
   }
 }
@@ -154,7 +181,24 @@ export function uid(): string {
   return Math.random().toString(36).slice(2) + Date.now().toString(36);
 }
 
-/** Build a plain-text resume summary from the profile for AI prompts */
+// ─── Saved search helpers ─────────────────────────────────────────────────────
+
+export function saveSearch(name: string, prefs: SearchPreferences): SavedSearch {
+  const profile = loadProfile();
+  const entry: SavedSearch = { id: uid(), name, createdAt: Date.now(), prefs: structuredClone(prefs) };
+  profile.savedSearches = [entry, ...profile.savedSearches];
+  saveProfile(profile);
+  return entry;
+}
+
+export function deleteSavedSearch(id: string): void {
+  const profile = loadProfile();
+  profile.savedSearches = profile.savedSearches.filter((s) => s.id !== id);
+  saveProfile(profile);
+}
+
+// ─── Resume text builder ──────────────────────────────────────────────────────
+
 export function buildResumeText(profile: Profile): string {
   const p = profile.personal;
   const lines: string[] = [];

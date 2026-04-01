@@ -133,8 +133,10 @@ export default function AutoApplyPage() {
             settings.customAnswers,   // ← injected here
           );
           updateJob(job.jobId, { coverLetter: cl?.reply ?? cl?.message ?? "" });
-        } catch {
+        } catch (e) {
           // non-fatal — cover letter failure doesn't block the rest
+          if (process.env.NODE_ENV === "development") console.warn("[cover letter]", e);
+          updateJob(job.jobId, { coverLetter: undefined });
         }
       }
 
@@ -490,11 +492,24 @@ function QueueJobRow({
         <div className="flex items-center gap-1.5 shrink-0">
           {STEPS.map((step) => (
             <div key={step} className="flex flex-col items-center gap-0.5">
-              <div className={cn("h-1.5 w-5 rounded-full", STEP_COLOR[job.steps[step]])} />
-              <span className="text-[9px] text-zinc-600">{STEP_LABELS[step]}</span>
+              <div className={cn("h-1.5 w-5 rounded-full transition-colors", STEP_COLOR[job.steps[step]])} />
+              <span className={cn(
+                "text-[9px]",
+                job.steps[step] === "running" ? "text-blue-400 font-medium" : "text-zinc-600"
+              )}>{STEP_LABELS[step]}</span>
             </div>
           ))}
         </div>
+
+        {/* Active step label */}
+        {job.status === "running" && (() => {
+          const active = STEPS.find((s) => job.steps[s] === "running");
+          return active ? (
+            <span className="text-[10px] text-blue-400 animate-pulse shrink-0 hidden sm:block">
+              {STEP_LABELS[active]}…
+            </span>
+          ) : null;
+        })()}
 
         {job.score != null && (
           <span className={cn("text-xs font-bold tabular-nums w-8 text-right", scoreColor(job.score))}>

@@ -228,14 +228,17 @@ export const api = {
       requireVisaSupport: boolean;
       jobTypes: string[];
       experienceLevels: string[];
+      zipCodes?: string[];
+      radiusMiles?: number;
     }) => {
-      // Build a plain-English scoring hint block the LLM scorer can read
       const hints: string[] = [];
       if (prefs.salaryMin) hints.push(`Minimum salary: ${prefs.salaryMin} ${prefs.salaryCurrency}`);
       if (prefs.salaryMax) hints.push(`Maximum salary: ${prefs.salaryMax} ${prefs.salaryCurrency}`);
       if (prefs.jobTypes.length) hints.push(`Preferred job types: ${prefs.jobTypes.join(", ")}`);
       if (prefs.experienceLevels.length) hints.push(`Target experience levels: ${prefs.experienceLevels.join(", ")}`);
       if (prefs.requireVisaSupport) hints.push("Only consider roles offering visa sponsorship.");
+      if (prefs.zipCodes?.length)
+        hints.push(`Preferred zip/postal codes: ${prefs.zipCodes.join(", ")} (within ${prefs.radiusMiles ?? 25} miles)`);
       if (prefs.blacklistedKeywords.length)
         hints.push(`Penalise heavily (score < 30) any job mentioning: ${prefs.blacklistedKeywords.join(", ")}`);
       if (prefs.blacklistedCompanies.length)
@@ -243,9 +246,7 @@ export const api = {
 
       if (hints.length === 0) return;
 
-      await client.patch("/settings", {
-        scorerHints: hints.join("\n"),
-      });
+      await client.patch("/settings", { scorerHints: hints.join("\n") });
     },
 
     run: async (opts: {
@@ -265,18 +266,24 @@ export const api = {
         requireVisaSupport: boolean;
         jobTypes: string[];
         experienceLevels: string[];
+        zipCodes?: string[];
+        radiusMiles?: number;
       };
     }) => {
-      // Sync scoring hints first so the scorer uses them during this run
       if (opts.prefs) {
         await api.search.syncPrefsToSettings({ keywords: opts.keywords, ...opts.prefs });
       }
+      // Expand zip codes into location terms the extractors can use
+      const locationTerms = [
+        ...opts.locations,
+        ...(opts.prefs?.zipCodes ?? []),
+      ];
       return client.post("/pipeline/run", {
         topN: opts.topN ?? 20,
         minSuitabilityScore: opts.minScore ?? 50,
         sources: opts.sources,
         searchKeywords: opts.keywords,
-        searchLocations: opts.locations,
+        searchLocations: locationTerms,
         remoteOnly: opts.remoteOnly ?? false,
       }).then((r) => r.data);
     },

@@ -157,56 +157,60 @@ export default function DashboardPage() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        <Card className="lg:col-span-2">
-          <CardHeader><CardTitle>7-day activity</CardTitle></CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={180}>
-              <AreaChart data={activityData} margin={{ top: 4, right: 4, bottom: 0, left: -20 }}>
-                <defs>
-                  <linearGradient id="gDisc" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3} />
-                    <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
-                  </linearGradient>
-                  <linearGradient id="gApp" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#10b981" stopOpacity={0.3} />
-                    <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
-                  </linearGradient>
-                </defs>
-                <XAxis dataKey="label" tick={{ fontSize: 11, fill: "#71717a" }} axisLine={false} tickLine={false} />
-                <YAxis tick={{ fontSize: 11, fill: "#71717a" }} axisLine={false} tickLine={false} allowDecimals={false} />
-                <ReTooltip contentStyle={{ background: "#18181b", border: "1px solid #3f3f46", borderRadius: 8, fontSize: 12 }} labelStyle={{ color: "#a1a1aa" }} />
-                <Area type="monotone" dataKey="discovered" stroke="#3b82f6" fill="url(#gDisc)" strokeWidth={2} name="Discovered" />
-                <Area type="monotone" dataKey="applied" stroke="#10b981" fill="url(#gApp)" strokeWidth={2} name="Applied" />
-              </AreaChart>
-            </ResponsiveContainer>
-            <div className="flex gap-4 mt-2">
-              <div className="flex items-center gap-1.5 text-xs text-zinc-400"><span className="h-2 w-2 rounded-full bg-blue-500" />Discovered</div>
-              <div className="flex items-center gap-1.5 text-xs text-zinc-400"><span className="h-2 w-2 rounded-full bg-emerald-500" />Applied</div>
-            </div>
-          </CardContent>
-        </Card>
+        <ErrorBoundary section="Activity chart">
+          <Card className="lg:col-span-2">
+            <CardHeader><CardTitle>7-day activity</CardTitle></CardHeader>
+            <CardContent>
+              <ResponsiveContainer width="100%" height={180}>
+                <AreaChart data={activityData} margin={{ top: 4, right: 4, bottom: 0, left: -20 }}>
+                  <defs>
+                    <linearGradient id="gDisc" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3} />
+                      <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
+                    </linearGradient>
+                    <linearGradient id="gApp" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#10b981" stopOpacity={0.3} />
+                      <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
+                    </linearGradient>
+                  </defs>
+                  <XAxis dataKey="label" tick={{ fontSize: 11, fill: "#71717a" }} axisLine={false} tickLine={false} />
+                  <YAxis tick={{ fontSize: 11, fill: "#71717a" }} axisLine={false} tickLine={false} allowDecimals={false} />
+                  <ReTooltip contentStyle={{ background: "#18181b", border: "1px solid #3f3f46", borderRadius: 8, fontSize: 12 }} labelStyle={{ color: "#a1a1aa" }} />
+                  <Area type="monotone" dataKey="discovered" stroke="#3b82f6" fill="url(#gDisc)" strokeWidth={2} name="Discovered" />
+                  <Area type="monotone" dataKey="applied" stroke="#10b981" fill="url(#gApp)" strokeWidth={2} name="Applied" />
+                </AreaChart>
+              </ResponsiveContainer>
+              <div className="flex gap-4 mt-2">
+                <div className="flex items-center gap-1.5 text-xs text-zinc-400"><span className="h-2 w-2 rounded-full bg-blue-500" />Discovered</div>
+                <div className="flex items-center gap-1.5 text-xs text-zinc-400"><span className="h-2 w-2 rounded-full bg-emerald-500" />Applied</div>
+              </div>
+            </CardContent>
+          </Card>
+        </ErrorBoundary>
 
-        <Card>
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <CardTitle>Score distribution</CardTitle>
-              <span className={cn("text-2xl font-bold", scoreColor(avgScore))}>{avgScore}</span>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={160}>
-              <BarChart data={scoreDist} margin={{ top: 4, right: 4, bottom: 0, left: -30 }}>
-                <XAxis dataKey="range" tick={{ fontSize: 10, fill: "#71717a" }} axisLine={false} tickLine={false} />
-                <YAxis tick={{ fontSize: 10, fill: "#71717a" }} axisLine={false} tickLine={false} allowDecimals={false} />
-                <ReTooltip contentStyle={{ background: "#18181b", border: "1px solid #3f3f46", borderRadius: 8, fontSize: 12 }} />
-                <Bar dataKey="count" radius={[3, 3, 0, 0]} name="Jobs">
-                  {scoreDist.map((b, i) => <Cell key={i} fill={b.color} />)}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
-            <p className="text-xs text-zinc-500 mt-1">Avg suitability across all jobs</p>
-          </CardContent>
-        </Card>
+        <ErrorBoundary section="Score chart">
+          <Card>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle>Score distribution</CardTitle>
+                <span className={cn("text-2xl font-bold", scoreColor(avgScore))}>{avgScore}</span>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <ResponsiveContainer width="100%" height={160}>
+                <BarChart data={scoreDist} margin={{ top: 4, right: 4, bottom: 0, left: -30 }}>
+                  <XAxis dataKey="range" tick={{ fontSize: 10, fill: "#71717a" }} axisLine={false} tickLine={false} />
+                  <YAxis tick={{ fontSize: 10, fill: "#71717a" }} axisLine={false} tickLine={false} allowDecimals={false} />
+                  <ReTooltip contentStyle={{ background: "#18181b", border: "1px solid #3f3f46", borderRadius: 8, fontSize: 12 }} />
+                  <Bar dataKey="count" radius={[3, 3, 0, 0]} name="Jobs">
+                    {scoreDist.map((b, i) => <Cell key={i} fill={b.color} />)}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+              <p className="text-xs text-zinc-500 mt-1">Avg suitability across all jobs</p>
+            </CardContent>
+          </Card>
+        </ErrorBoundary>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
