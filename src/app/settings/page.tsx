@@ -80,7 +80,8 @@ export default function SettingsPage() {
   const { data: profileStatus } = useQuery({
     queryKey: ["profile-status"],
     queryFn: () => api.profile.status(),
-    refetchInterval: 30_000,
+    refetchInterval: 60_000,
+    staleTime: 45_000,
   });
 
   const [form, setForm] = useState<AppSettings>({});

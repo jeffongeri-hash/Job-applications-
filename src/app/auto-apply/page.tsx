@@ -60,7 +60,8 @@ export default function AutoApplyPage() {
   const { data: readyJobs, refetch } = useQuery({
     queryKey: ["jobs", "ready"],
     queryFn: () => api.jobs.list(["ready"]),
-    refetchInterval: 15_000,
+    refetchInterval: 45_000,
+    staleTime: 30_000,
   });
 
   const updateSettings = (patch: Partial<AutoApplySettings>) => {

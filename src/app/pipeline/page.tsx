@@ -51,13 +51,15 @@ export default function PipelinePage() {
   const { data: pipelineStatus, refetch: refetchStatus } = useQuery({
     queryKey: ["pipeline-status"],
     queryFn: () => api.pipeline.status(),
-    refetchInterval: 5_000,
+    // Poll at 15s idle; 8s while running to reduce CPU load on Windows hosts
+    refetchInterval: (query) => (query.state.data?.isRunning ? 8_000 : 15_000),
   });
 
   const { data: runs } = useQuery({
     queryKey: ["pipeline-runs"],
     queryFn: () => api.pipeline.runs(),
-    refetchInterval: 10_000,
+    refetchInterval: 45_000,
+    staleTime: 30_000,
   });
 
   // Live SSE progress

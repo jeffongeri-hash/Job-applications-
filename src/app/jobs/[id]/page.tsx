@@ -23,7 +23,8 @@ export default function JobDetailPage() {
   const { data: job, isLoading } = useQuery({
     queryKey: ["job", id],
     queryFn: () => api.jobs.get(id),
-    refetchInterval: 15_000,
+    refetchInterval: 45_000,
+    staleTime: 30_000,
   });
 
   const { data: events } = useQuery({

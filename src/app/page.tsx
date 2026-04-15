@@ -42,14 +42,14 @@ export default function DashboardPage() {
     queryKey: ["pipeline-status"],
     queryFn: () => api.pipeline.status(),
     // Poll fast while running, slow otherwise
-    refetchInterval: (query) => (query.state.data?.isRunning ? 5_000 : 15_000),
+    refetchInterval: (query) => (query.state.data?.isRunning ? 8_000 : 30_000),
   });
 
   const { data: pipelineRuns } = useQuery({
     queryKey: ["pipeline-runs"],
     queryFn: () => api.pipeline.runs(),
-    refetchInterval: 30_000,
-    staleTime: 20_000,
+    refetchInterval: 60_000,
+    staleTime: 45_000,
   });
 
   const handleRunPipeline = async () => {

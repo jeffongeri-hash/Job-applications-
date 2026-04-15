@@ -1,0 +1,72 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Lightweight stack: job-ops backend + this frontend
+#
+# Usage:
+#   1. Clone job-ops NEXT TO this folder:
+#        git clone https://github.com/DaKheera47/job-ops ../job-ops
+#   2. Copy your env file:
+#        copy .env.example .env.local
+#   3. Start everything:
+#        docker compose up -d
+#   4. Open http://localhost:3000
+#
+# Resource limits are intentionally conservative so Docker doesn't slow
+# down your whole machine. Raise cpus/memory if you have headroom.
+# ─────────────────────────────────────────────────────────────────────────────
+
+services:
+
+  # ── job-ops backend ─────────────────────────────────────────────────────────
+  job-ops:
+    build:
+      context: ../job-ops        # sibling directory — clone job-ops there first
+      dockerfile: Dockerfile
+    container_name: job-ops
+    restart: on-failure:3        # retry up to 3x, then stop — avoids spin loops
+    ports:
+      - "3005:3005"
+    volumes:
+      - job-ops-data:/app/data   # persist the SQLite DB between restarts
+    environment:
+      NODE_ENV: production
+      PORT: 3005
+      # ── paste your LLM key + settings below ──
+      # LLM_PROVIDER: openai
+      # LLM_API_KEY: sk-...
+      # LLM_MODEL: gpt-4o-mini      ← use a smaller/cheaper model to reduce latency
+    deploy:
+      resources:
+        limits:
+          cpus: "0.75"           # at most ¾ of one CPU core
+          memory: 512M           # hard memory ceiling
+        reservations:
+          cpus: "0.10"
+          memory: 128M
+
+  # ── Next.js frontend ────────────────────────────────────────────────────────
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: job-ops-ui
+    restart: on-failure:3
+    ports:
+      - "3000:3000"
+    depends_on:
+      - job-ops
+    environment:
+      NODE_ENV: production
+      NEXT_TELEMETRY_DISABLED: "1"
+      NEXT_PUBLIC_JOB_OPS_URL: http://job-ops:3005   # internal Docker network
+      JOB_OPS_URL: http://job-ops:3005
+    deploy:
+      resources:
+        limits:
+          cpus: "0.50"
+          memory: 256M
+        reservations:
+          cpus: "0.05"
+          memory: 64M
+
+volumes:
+  job-ops-data:
