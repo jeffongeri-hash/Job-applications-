@@ -1,0 +1,15 @@
+# Railway config for the job-ops backend service.
+# In Railway dashboard: set Root Directory = /job-ops-service
+
+[build]
+builder        = "dockerfile"
+dockerfilePath = "Dockerfile"
+
+[deploy]
+healthcheckPath    = "/health"
+healthcheckTimeout = 60
+restartPolicyType  = "on_failure"
+restartPolicyMaxRetries = 3
+
+[[services]]
+name = "job-ops"

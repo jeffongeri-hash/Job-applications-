@@ -1,24 +1,50 @@
-# Railway deployment config for JobOps UI (Next.js frontend)
-# https://docs.railway.app/reference/config-as-code
+# ─────────────────────────────────────────────────────────────────────────────
+# Railway monorepo — ONE repo, THREE services
 #
-# Deploy steps:
-#   1. Push this repo to GitHub
-#   2. New project → Deploy from GitHub → select this repo
-#   3. Railway auto-detects this file and uses Dockerfile
-#   4. Set environment variables in Railway dashboard:
-#        NEXT_PUBLIC_JOB_OPS_URL  = https://your-job-ops.railway.app
-#        JOB_OPS_URL              = https://your-job-ops.railway.app
-#   5. Railway injects PORT automatically — no action needed
+# After pushing this repo to GitHub, create each service in Railway like this:
+#
+#  Service 1 — JobOps UI (Next.js frontend)
+#    New Service → GitHub → this repo
+#    Root Directory: /            (leave blank / default)
+#    Uses: /Dockerfile
+#
+#  Service 2 — job-ops backend
+#    New Service → GitHub → this repo
+#    Root Directory: /job-ops-service
+#    Uses: /job-ops-service/Dockerfile  (pulls ghcr.io/dakheera47/job-ops:latest)
+#
+#  Service 3 — Naukri auto-applier
+#    New Service → GitHub → this repo
+#    Root Directory: /naukri-service
+#    Uses: /naukri-service/Dockerfile
+#
+# Environment variables to set per service in the Railway dashboard:
+#
+#  ── JobOps UI ──────────────────────────────────────────────────────────────
+#  NEXT_PUBLIC_JOB_OPS_URL = https://<job-ops-service>.up.railway.app
+#  JOB_OPS_URL             = https://<job-ops-service>.up.railway.app
+#  NAUKRI_SERVICE_URL      = https://<naukri-service>.up.railway.app
+#
+#  ── job-ops backend ─────────────────────────────────────────────────────────
+#  LLM_PROVIDER = openai
+#  LLM_API_KEY  = sk-...
+#  LLM_MODEL    = gpt-4o-mini
+#
+#  ── Naukri applier ──────────────────────────────────────────────────────────
+#  NAUKRI_EMAIL        = you@email.com   (optional — can be sent per-run)
+#  NAUKRI_PASSWORD     = yourpassword    (optional)
+#  NAUKRI_FILTERED_URL = https://www.naukri.com/jobs-in-india?k=...
+#
+# PORT is injected automatically by Railway — never set it manually.
+# ─────────────────────────────────────────────────────────────────────────────
 
+# This file configures Service 1 (JobOps UI frontend).
 [build]
-builder          = "dockerfile"
-dockerfilePath   = "Dockerfile"
+builder        = "dockerfile"
+dockerfilePath = "Dockerfile"
 
 [deploy]
-healthcheckPath    = "/"
-healthcheckTimeout = 100
-restartPolicyType  = "on_failure"
+healthcheckPath         = "/"
+healthcheckTimeout      = 100
+restartPolicyType       = "on_failure"
 restartPolicyMaxRetries = 3
-
-[[services]]
-name = "job-ops-ui"

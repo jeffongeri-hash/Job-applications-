@@ -27,22 +27,24 @@ x-logging: &default-logging
 services:
 
   # ── job-ops backend ──────────────────────────────────────────────────────────
+  # Uses the submodule at ./job-ops (run: git submodule update --init first)
+  # Internal port is 3001; mapped to host 3005 to match the frontend default.
   job-ops:
     build:
-      context: ../job-ops
+      context: ./job-ops        # git submodule — run setup.sh once first
       dockerfile: Dockerfile
-      args:
-        BUILDKIT_INLINE_CACHE: "1"
     image: job-ops:local
     container_name: job-ops
     restart: on-failure:3
     ports:
-      - "3005:3005"
+      - "3005:3001"             # host:container (job-ops listens on 3001)
     volumes:
       - job-ops-data:/app/data
     environment:
       NODE_ENV: production
-      PORT: 3005
+      PORT: 3001
+      PYTHON_PATH: /usr/bin/python3
+      DATA_DIR: /app/data
       # LLM_PROVIDER: openai
       # LLM_API_KEY: sk-...
       # LLM_MODEL: gpt-4o-mini
@@ -73,9 +75,9 @@ services:
     environment:
       NODE_ENV: production
       NEXT_TELEMETRY_DISABLED: "1"
-      NEXT_PUBLIC_JOB_OPS_URL: http://job-ops:3005
-      JOB_OPS_URL: http://job-ops:3005
-      # Naukri service URL (used by /api/naukri-run route)
+      # job-ops listens on 3001 inside Docker network (host maps it to 3005)
+      NEXT_PUBLIC_JOB_OPS_URL: http://job-ops:3001
+      JOB_OPS_URL: http://job-ops:3001
       NAUKRI_SERVICE_URL: http://naukri-applier:4000
     deploy:
       resources:
