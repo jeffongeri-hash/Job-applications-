@@ -1,11 +1,10 @@
 # syntax=docker/dockerfile:1
 # ── Stage 1: deps ─────────────────────────────────────────────────────────────
-# BuildKit cache mount keeps the npm cache between rebuilds so packages are
-# never re-downloaded — rebuild goes from ~3 min → ~20 s on a warm cache.
 FROM node:20-alpine AS deps
 WORKDIR /app
 COPY package.json package-lock.json ./
-RUN --mount=type=cache,id=jobops-npm,target=/root/.npm \
+# Railway requires cache IDs prefixed with $RAILWAY_CACHE_KEY
+RUN --mount=type=cache,id=${RAILWAY_CACHE_KEY}-npm,target=/root/.npm \
     npm ci --prefer-offline --no-audit --no-fund
 
 # ── Stage 2: build ────────────────────────────────────────────────────────────
@@ -14,12 +13,10 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 ENV NEXT_TELEMETRY_DISABLED=1
-RUN --mount=type=cache,id=jobops-npm,target=/root/.npm \
+RUN --mount=type=cache,id=${RAILWAY_CACHE_KEY}-npm,target=/root/.npm \
     npm run build
 
-# ── Stage 3: runner (minimal — only standalone output) ───────────────────────
-# node:20-alpine is ~130 MB; standalone output strips unused Next.js internals.
-# Final image size is typically 180–220 MB vs 1.2 GB for the full dev image.
+# ── Stage 3: runner ───────────────────────────────────────────────────────────
 FROM node:20-alpine AS runner
 WORKDIR /app
 ENV NODE_ENV=production

@@ -24,7 +24,7 @@ WORKDIR /app
 
 # Python deps (cached separately from source changes)
 COPY requirements.txt ./
-RUN --mount=type=cache,id=naukri-pip,target=/root/.cache/pip \
+RUN --mount=type=cache,id=${RAILWAY_CACHE_KEY}-pip,target=/root/.cache/pip \
     pip install -r requirements.txt
 
 COPY naukri_service.py ./
