@@ -1,43 +1,32 @@
 # ─────────────────────────────────────────────────────────────────────────────
-# Full stack: job-ops backend + JobOps UI + Naukri applier + LinkedIn applier
-#
-# Quick start (core only):
-#   git clone https://github.com/DaKheera47/job-ops ../job-ops
+# Quick start — no build required for the backend:
 #   copy .env.example .env.local
 #   docker compose up -d
 #   open http://localhost:3000
 #
-# Naukri applier (optional):
-#   docker compose --profile naukri up -d naukri-applier
-#   Set NAUKRI_EMAIL / NAUKRI_PASSWORD / NAUKRI_FILTERED_URL env vars
-#   Or trigger via: POST http://localhost:4000/run
+# The job-ops backend uses the published image (no source build).
+# The frontend builds locally (~30 s with Docker layer cache).
 #
-# LinkedIn applier (optional, local only):
-#   git clone https://github.com/GodsScion/Auto_job_applier_linkedIn ../linkedin-applier
-#   Use "LinkedIn config" button in the Search page, then:
-#   docker compose --profile linkedin up -d linkedin-applier
+# Optional services (only started when explicitly requested):
+#   Naukri:   docker compose --profile naukri up -d naukri-applier
+#   LinkedIn: see Search page → "LinkedIn config" button (runs locally)
 # ─────────────────────────────────────────────────────────────────────────────
 
 x-logging: &default-logging
   driver: "json-file"
   options:
-    max-size: "10m"
-    max-file: "3"
+    max-size: "5m"
+    max-file: "2"
 
 services:
 
-  # ── job-ops backend ──────────────────────────────────────────────────────────
-  # Uses the submodule at ./job-ops (run: git submodule update --init first)
-  # Internal port is 3001; mapped to host 3005 to match the frontend default.
+  # ── job-ops backend — pre-built image, no source compile ─────────────────────
   job-ops:
-    build:
-      context: ./job-ops        # git submodule — run setup.sh once first
-      dockerfile: Dockerfile
-    image: job-ops:local
+    image: ghcr.io/dakheera47/job-ops:latest   # pull only, zero build time
     container_name: job-ops
     restart: on-failure:3
     ports:
-      - "3005:3001"             # host:container (job-ops listens on 3001)
+      - "3005:3001"
     volumes:
       - job-ops-data:/app/data
     environment:
@@ -53,9 +42,6 @@ services:
         limits:
           cpus: "0.75"
           memory: 512M
-        reservations:
-          cpus: "0.10"
-          memory: 128M
     logging: *default-logging
 
   # ── Next.js frontend ─────────────────────────────────────────────────────────
@@ -63,8 +49,6 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-      args:
-        BUILDKIT_INLINE_CACHE: "1"
     image: job-ops-ui:local
     container_name: job-ops-ui
     restart: on-failure:3
@@ -75,7 +59,6 @@ services:
     environment:
       NODE_ENV: production
       NEXT_TELEMETRY_DISABLED: "1"
-      # job-ops listens on 3001 inside Docker network (host maps it to 3005)
       NEXT_PUBLIC_JOB_OPS_URL: http://job-ops:3001
       JOB_OPS_URL: http://job-ops:3001
       NAUKRI_SERVICE_URL: http://naukri-applier:4000
@@ -84,24 +67,15 @@ services:
         limits:
           cpus: "0.50"
           memory: 256M
-        reservations:
-          cpus: "0.05"
-          memory: 64M
     logging: *default-logging
 
-  # ── Naukri auto-applier ───────────────────────────────────────────────────────
-  # Built from naukri-service/ — headless Chrome + Flask REST API.
-  # Trigger a run from the "Naukri" tab in the Search page or via curl:
-  #   curl -X POST http://localhost:4000/run \
-  #     -H "Content-Type: application/json" \
-  #     -d '{"email":"you@email.com","password":"...","filteredUrl":"https://www.naukri.com/jobs-in-india?..."}'
+  # ── Naukri applier (optional) ─────────────────────────────────────────────────
+  # Headless Chrome + Flask — only starts with: docker compose --profile naukri up -d
   naukri-applier:
     profiles: ["naukri"]
     build:
       context: ./naukri-service
       dockerfile: Dockerfile
-      args:
-        BUILDKIT_INLINE_CACHE: "1"
     image: naukri-applier:local
     container_name: naukri-applier
     restart: on-failure:3
@@ -123,39 +97,9 @@ services:
         limits:
           cpus: "1.00"
           memory: 1G
-        reservations:
-          cpus: "0.25"
-          memory: 512M
-    logging: *default-logging
-
-  # ── LinkedIn auto-applier (local/Windows only) ────────────────────────────────
-  linkedin-applier:
-    profiles: ["linkedin"]
-    build:
-      context: ../linkedin-applier
-      dockerfile: Dockerfile.docker
-    image: linkedin-applier:local
-    container_name: linkedin-applier
-    restart: "no"
-    volumes:
-      - ./linkedin-config:/app/config:ro
-      - linkedin-output:/app/all excels
-      - linkedin-logs:/app/logs
-    environment:
-      DISPLAY: ":99"
-      PYTHONDONTWRITEBYTECODE: "1"
-      PYTHONUNBUFFERED: "1"
-    shm_size: "1gb"
-    deploy:
-      resources:
-        limits:
-          cpus: "1.00"
-          memory: 1G
     logging: *default-logging
 
 volumes:
   job-ops-data:
   naukri-data:
   naukri-logs:
-  linkedin-output:
-  linkedin-logs:

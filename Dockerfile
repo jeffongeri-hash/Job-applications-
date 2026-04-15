@@ -1,11 +1,11 @@
 # syntax=docker/dockerfile:1
-# ── Stage 1: deps ─────────────────────────────────────────────────────────────
+# ── Stage 1: install deps ─────────────────────────────────────────────────────
+# Copying package files first lets Docker cache this layer.
+# npm ci only re-runs when package.json or package-lock.json changes.
 FROM node:20-alpine AS deps
 WORKDIR /app
 COPY package.json package-lock.json ./
-# Railway requires cache IDs prefixed with $RAILWAY_CACHE_KEY
-RUN --mount=type=cache,id=${RAILWAY_CACHE_KEY}-npm,target=/root/.npm \
-    npm ci --prefer-offline --no-audit --no-fund
+RUN npm ci --prefer-offline --no-audit --no-fund
 
 # ── Stage 2: build ────────────────────────────────────────────────────────────
 FROM node:20-alpine AS builder
@@ -13,10 +13,9 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 ENV NEXT_TELEMETRY_DISABLED=1
-RUN --mount=type=cache,id=${RAILWAY_CACHE_KEY}-npm,target=/root/.npm \
-    npm run build
+RUN npm run build
 
-# ── Stage 3: runner ───────────────────────────────────────────────────────────
+# ── Stage 3: minimal runtime (~200 MB final image) ───────────────────────────
 FROM node:20-alpine AS runner
 WORKDIR /app
 ENV NODE_ENV=production
