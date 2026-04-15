@@ -15,7 +15,7 @@ import { Separator } from "@/components/ui/separator";
 import {
   Search, MapPin, DollarSign, X, Plus, Play, Save,
   SlidersHorizontal, Building2, Globe, Zap, Bookmark,
-  Trash2, Clock, ChevronDown, ChevronUp, Navigation,
+  Trash2, Clock, ChevronDown, ChevronUp, Navigation, Link2,
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -73,6 +73,7 @@ export default function SearchPage() {
   const [running, setRunning] = useState(false);
   const [saveName, setSaveName] = useState("");
   const [showSaves, setShowSaves] = useState(false);
+  const [exporting, setExporting] = useState(false);
 
   useEffect(() => {
     const p = loadProfile();
@@ -135,6 +136,29 @@ export default function SearchPage() {
 
   const toggleArray = <T,>(arr: T[], val: T): T[] =>
     arr.includes(val) ? arr.filter((x) => x !== val) : [...arr, val];
+
+  const exportLinkedInConfig = async () => {
+    setExporting(true);
+    try {
+      const profile = loadProfile();
+      const res = await fetch("/api/export-linkedin-config", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ profile }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? "Export failed");
+      toast.success(
+        `LinkedIn config written to ${data.targetDir} — add credentials to config/secrets.py then run python runAiBot.py`,
+        { duration: 8000 }
+      );
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Export failed";
+      toast.error(msg);
+    } finally {
+      setExporting(false);
+    }
+  };
 
   const runSearch = async () => {
     if (!prefs) return;
@@ -203,6 +227,17 @@ export default function SearchPage() {
               <Save className="h-3.5 w-3.5" /> Save prefs
             </Button>
           )}
+          <Button
+            variant="outline" size="sm"
+            onClick={exportLinkedInConfig}
+            disabled={exporting}
+            title="Generate Python config files for Auto_job_applier_linkedIn"
+          >
+            {exporting
+              ? <span className="h-3.5 w-3.5 rounded-full border-2 border-zinc-400 border-t-transparent animate-spin" />
+              : <Link2 className="h-3.5 w-3.5" />}
+            LinkedIn config
+          </Button>
           <Button onClick={runSearch} disabled={running} size="sm" className="gap-1.5">
             {running
               ? <><span className="h-3.5 w-3.5 rounded-full border-2 border-zinc-400 border-t-transparent animate-spin" /> Searching…</>
