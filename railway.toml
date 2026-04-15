@@ -1,0 +1,24 @@
+# Railway deployment config for JobOps UI (Next.js frontend)
+# https://docs.railway.app/reference/config-as-code
+#
+# Deploy steps:
+#   1. Push this repo to GitHub
+#   2. New project → Deploy from GitHub → select this repo
+#   3. Railway auto-detects this file and uses Dockerfile
+#   4. Set environment variables in Railway dashboard:
+#        NEXT_PUBLIC_JOB_OPS_URL  = https://your-job-ops.railway.app
+#        JOB_OPS_URL              = https://your-job-ops.railway.app
+#   5. Railway injects PORT automatically — no action needed
+
+[build]
+builder          = "dockerfile"
+dockerfilePath   = "Dockerfile"
+
+[deploy]
+healthcheckPath    = "/"
+healthcheckTimeout = 100
+restartPolicyType  = "on_failure"
+restartPolicyMaxRetries = 3
+
+[[services]]
+name = "job-ops-ui"

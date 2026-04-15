@@ -15,7 +15,7 @@ import { Separator } from "@/components/ui/separator";
 import {
   Search, MapPin, DollarSign, X, Plus, Play, Save,
   SlidersHorizontal, Building2, Globe, Zap, Bookmark,
-  Trash2, Clock, ChevronDown, ChevronUp, Navigation, Link2,
+  Trash2, Clock, ChevronDown, ChevronUp, Navigation, Link2, ExternalLink,
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -74,6 +74,12 @@ export default function SearchPage() {
   const [saveName, setSaveName] = useState("");
   const [showSaves, setShowSaves] = useState(false);
   const [exporting, setExporting] = useState(false);
+  const [naukriEmail, setNaukriEmail] = useState("");
+  const [naukriPassword, setNaukriPassword] = useState("");
+  const [naukriUrl, setNaukriUrl] = useState("");
+  const [naukriLimit, setNaukriLimit] = useState(10);
+  const [naukriRunning, setNaukriRunning] = useState(false);
+  const [naukriStatus, setNaukriStatus] = useState<{ applied: number; failed: number; log: string[] } | null>(null);
 
   useEffect(() => {
     const p = loadProfile();
@@ -157,6 +163,41 @@ export default function SearchPage() {
       toast.error(msg);
     } finally {
       setExporting(false);
+    }
+  };
+
+  const runNaukri = async () => {
+    if (!naukriEmail || !naukriPassword || !naukriUrl) {
+      toast.error("Fill in Naukri credentials and filtered URL first");
+      return;
+    }
+    setNaukriRunning(true);
+    try {
+      const res = await fetch("/api/naukri", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: naukriEmail,
+          password: naukriPassword,
+          filteredUrl: naukriUrl,
+          limit: naukriLimit,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? "Failed to start");
+      toast.success("Naukri run started — check status below");
+      // Poll status every 5s while running
+      const poll = setInterval(async () => {
+        const sr = await fetch("/api/naukri?action=status");
+        const sd = await sr.json();
+        setNaukriStatus(sd);
+        if (!sd.running) clearInterval(poll);
+      }, 5000);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Error";
+      toast.error(msg);
+    } finally {
+      setNaukriRunning(false);
     }
   };
 
@@ -655,6 +696,94 @@ export default function SearchPage() {
               Up to {topN * selectedSources.size} total from {selectedSources.size} source{selectedSources.size !== 1 ? "s" : ""}
             </p>
           </div>
+        </CardContent>
+      </Card>
+
+      {/* Naukri auto-applier */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <ExternalLink className="h-4 w-4 text-orange-400" />
+            Naukri Auto-Apply
+            <span className="text-xs font-normal text-zinc-500 ml-1">— powered by Job-Hunter</span>
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <p className="text-xs text-zinc-400 leading-relaxed">
+            Automatically apply to Easy Apply jobs on{" "}
+            <span className="text-orange-300 font-medium">Naukri.com</span>.
+            Requires the Naukri service running:{" "}
+            <code className="text-[10px] bg-zinc-800 px-1.5 py-0.5 rounded">
+              docker compose --profile naukri up -d
+            </code>
+          </p>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="text-xs text-zinc-400 mb-1.5 block">Naukri email</label>
+              <Input
+                type="email"
+                value={naukriEmail}
+                onChange={(e) => setNaukriEmail(e.target.value)}
+                placeholder="you@email.com"
+              />
+            </div>
+            <div>
+              <label className="text-xs text-zinc-400 mb-1.5 block">Password</label>
+              <Input
+                type="password"
+                value={naukriPassword}
+                onChange={(e) => setNaukriPassword(e.target.value)}
+                placeholder="••••••••"
+              />
+            </div>
+          </div>
+          <div>
+            <label className="text-xs text-zinc-400 mb-1.5 block">
+              Filtered Naukri search URL
+              <span className="text-zinc-600 ml-1">— apply your filters on naukri.com then paste the URL</span>
+            </label>
+            <Input
+              value={naukriUrl}
+              onChange={(e) => setNaukriUrl(e.target.value)}
+              placeholder="https://www.naukri.com/jobs-in-india?k=react+developer&l=bangalore"
+            />
+          </div>
+          <div className="flex items-center gap-4">
+            <div>
+              <label className="text-xs text-zinc-400 mb-1.5 block">Apply limit</label>
+              <Input
+                type="number" min={1} max={50}
+                value={naukriLimit}
+                onChange={(e) => setNaukriLimit(Number(e.target.value))}
+                className="w-24"
+              />
+            </div>
+            <Button
+              className="mt-5 gap-1.5"
+              onClick={runNaukri}
+              disabled={naukriRunning}
+            >
+              {naukriRunning
+                ? <><span className="h-3.5 w-3.5 rounded-full border-2 border-zinc-400 border-t-transparent animate-spin" /> Starting…</>
+                : <><Play className="h-3.5 w-3.5" /> Run on Naukri</>}
+            </Button>
+          </div>
+
+          {naukriStatus && (
+            <div className="space-y-2">
+              <div className="flex items-center gap-4 text-xs text-zinc-400">
+                <span className="text-emerald-400 font-medium">{naukriStatus.applied} applied</span>
+                <span className="text-red-400">{naukriStatus.failed} failed</span>
+              </div>
+              {naukriStatus.log.length > 0 && (
+                <div className="bg-zinc-950 rounded-lg p-3 h-32 overflow-y-auto font-mono text-xs text-zinc-400 space-y-0.5">
+                  {naukriStatus.log.slice(-20).map((line, i) => (
+                    <p key={i}>{line}</p>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
         </CardContent>
       </Card>
 
