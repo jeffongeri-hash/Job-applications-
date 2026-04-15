@@ -57,7 +57,8 @@ export default function DashboardPage() {
       await api.pipeline.run({ topN: 20, minSuitabilityScore: 60 });
       toast.success("Pipeline started!");
       refetchPipeline();
-    } catch {
+    } catch (e) {
+      if (process.env.NODE_ENV === "development") console.warn("[pipeline run]", e);
       toast.error("Failed to start pipeline");
     }
   };

@@ -5,7 +5,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import { loadProfile, saveProfile, buildResumeText } from "@/lib/profile-store";
 import type { AutoApplySettings } from "@/lib/profile-store";
-import { cn, scoreColor, STATUS_COLORS, formatSalary } from "@/lib/utils";
+import { cn, scoreColor, formatSalary } from "@/lib/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";

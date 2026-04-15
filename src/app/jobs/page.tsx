@@ -275,7 +275,8 @@ function JobRow({
       await fn();
       toast.success(`${label} done`);
       onRefresh();
-    } catch {
+    } catch (e) {
+      if (process.env.NODE_ENV === "development") console.warn(`[bulk action: ${label}]`, e);
       toast.error(`${label} failed`);
     } finally {
       setLoading(null);

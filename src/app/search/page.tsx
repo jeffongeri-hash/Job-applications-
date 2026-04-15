@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useState, useEffect, useRef } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import {
   loadProfile, saveProfile, saveSearch, deleteSavedSearch,
@@ -80,6 +80,10 @@ export default function SearchPage() {
   const [naukriLimit, setNaukriLimit] = useState(10);
   const [naukriRunning, setNaukriRunning] = useState(false);
   const [naukriStatus, setNaukriStatus] = useState<{ applied: number; failed: number; log: string[] } | null>(null);
+  const naukriPollRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  // Clean up any running Naukri status poll on unmount
+  useEffect(() => () => { if (naukriPollRef.current) clearInterval(naukriPollRef.current); }, []);
 
   useEffect(() => {
     const p = loadProfile();
@@ -186,15 +190,22 @@ export default function SearchPage() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "Failed to start");
       toast.success("Naukri run started — check status below");
-      // Poll status every 5s while running
-      const poll = setInterval(async () => {
-        const sr = await fetch("/api/naukri?action=status");
-        const sd = await sr.json();
-        setNaukriStatus(sd);
-        if (!sd.running) clearInterval(poll);
+      // Poll status every 5 s; clears itself when the run finishes or on unmount
+      naukriPollRef.current = setInterval(async () => {
+        try {
+          const sr = await fetch("/api/naukri?action=status");
+          const sd = await sr.json();
+          setNaukriStatus(sd);
+          if (!sd.running) {
+            clearInterval(naukriPollRef.current!);
+            naukriPollRef.current = null;
+          }
+        } catch (e) {
+          if (process.env.NODE_ENV === "development") console.warn("[naukri poll]", e);
+        }
       }, 5000);
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : "Error";
+      const msg = err instanceof Error ? err.message : "Run failed";
       toast.error(msg);
     } finally {
       setNaukriRunning(false);

@@ -43,7 +43,8 @@ export default function JobDetailPage() {
       await fn();
       toast.success(`${label} done`);
       refresh();
-    } catch {
+    } catch (e) {
+      if (process.env.NODE_ENV === "development") console.warn(`[job action: ${label}]`, e);
       toast.error(`${label} failed`);
     }
   };

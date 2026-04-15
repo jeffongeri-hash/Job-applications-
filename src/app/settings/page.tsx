@@ -113,7 +113,8 @@ export default function SettingsPage() {
     try {
       await api.profile.refresh();
       toast.success("Profile cache cleared");
-    } catch {
+    } catch (e) {
+      if (process.env.NODE_ENV === "development") console.warn("[profile refresh]", e);
       toast.error("Failed to refresh profile");
     }
   };

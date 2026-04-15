@@ -488,7 +488,7 @@ Persistent=true
 WantedBy=timers.target`;
 
   const dockerCron = `# Add to your crontab (crontab -e):
-${schedule} docker exec job-ops curl -s -X POST http://localhost:3001/api/pipeline/run -H "Content-Type: application/json" -d '{"topN":20}'`;
+${schedule} docker exec job-ops curl -s -X POST ${API_URL}/api/pipeline/run -H "Content-Type: application/json" -d '{"topN":20}'`;
 
   const PRESETS = [
     { label: "Daily 8am", cron: "0 8 * * *" },
