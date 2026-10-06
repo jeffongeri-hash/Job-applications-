@@ -9,6 +9,7 @@ Drafts for PA-C and CRA roles, prepared Oct 6, 2026. Nothing has been sent.
 5. [`remote-cra.md`](remote-cra.md): remote CRA roles and a cover letter based on the resume only
 6. [`packages/`](packages/README.md): one ready-to-fill package per role (16 roles)
 7. [`broader-search-2026-10-06.md`](broader-search-2026-10-06.md): additional PA, locum, remote and CRA/research roles
+8. [`job-ops-linkedin-2026-10-06.md`](job-ops-linkedin-2026-10-06.md): PA and clinical research roles from a job-ops LinkedIn run (unscored)
 
 Search results come from the Indeed and ZipRecruiter connectors and web search. Postings change quickly, so
 confirm each is still open. Fill every `[bracket]` before sending.
