@@ -7,7 +7,7 @@ things I could not verify and need your input before sending.
 
 - **Current role:** Physician Assistant (PA-C), UnityPoint Health – Allen Hospital, Emergency Department, Oct 2025 – present
 - **Education:** MS, Des Moines University (College of Health Sciences); BS, Indiana University (College of Arts & Sciences)
-- **Certifications:** PA-C, ACLS, BLS, CCRA
+- **Certifications:** PA-C, ACLS, BLS, CCRA (expired)
 - **Research assistant internships:**
   - Clinical Pharmacology Research (Dec 2021)
   - Lab of Social Neuroscience, Indiana University (Aug 2020)
@@ -17,19 +17,19 @@ things I could not verify and need your input before sending.
 
 ## Stated by you (not on the resume)
 
-- California PA license: **application in progress**
+- California PA license: **application in progress, expected January 2027**
 - You worked as a CRA before PA school; **not used in the drafts** (you chose "use only the resume as is")
-- CCRA could be recertified
+- CCRA is **expired**; you can recertify soon
 
 ## Gaps to fill before sending
 
 | Item | Why it matters |
 |---|---|
-| `[CA PA license number or expected issue date]` | Required for nearly every CA role, locums especially. State it truthfully as pending. |
+| `[CA PA license number]` | Expected issue date is January 2027 (about 3 months out). Many roles will want it before a start date. |
 | `[CA DEA registration / furnishing number status]` | Often asked on locum and urgent care intake forms. |
-| `[ED volume, acuity, shifts per month at Allen Hospital]` | Strengthens every ER letter. Left generic until you supply it. |
+| `[Confirm: 14–20 is patients per shift?]` | You gave 14–20 as your ED volume. Confirm the unit, plus acuity mix and shifts per month. |
 | `[Phone, city, email to put on letters]` | Left as placeholders. |
-| `[CCRA certifying body and expiry date]` | Needed for CRA applications. Draft says "certification status to confirm". |
+| `[CCRA certifying body, expiry date, recert date]` | CCRA is expired. The CRA letter says so. Update once recertified. |
 | `[Earliest start date and notice period]` | Locum agencies and TeamHealth will ask. |
 
 ## California licensing checklist (PA)

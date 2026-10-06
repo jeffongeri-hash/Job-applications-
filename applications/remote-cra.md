@@ -22,7 +22,8 @@ experience is claimed.
   realistic targets. A clinical background (PA-C, ED) is a real selling point for safety and
   medical-monitoring work.
 - IQVIA entry-level CRA postings usually ask for a CRA trainee program or about 3 months of on-site monitoring.
-- Confirm CCRA is current. If it lapsed, the cover letter should not say "certified".
+- Your CCRA has expired, so the letter says it has lapsed and that you plan to recertify. Recertifying before you apply
+  will make these applications noticeably stronger.
 - A PA salary will likely exceed most CRA pay. Your Indeed minimum is $110k.
 
 ## Cover letter
@@ -32,7 +33,7 @@ experience is claimed.
 > Dear [Hiring Manager],
 >
 > I am applying for the [Role] at [Employer]. I am a PA-C working in emergency medicine at
-> UnityPoint Health – Allen Hospital, and I hold a CCRA certification [status to confirm].
+> UnityPoint Health – Allen Hospital, and I previously earned a CCRA certification, which has lapsed; I plan to recertify [add date if known].
 > Before and during my training I held research assistant internships at Indiana University's
 > neuroimaging and social neuroscience labs, the American Physician Scientists Association,
 > and Clinical Pharmacology Research.
@@ -45,4 +46,4 @@ experience is claimed.
 > My resume is attached.
 >
 > Sincerely,
-> [Name], PA-C, CCRA [confirm] · [Phone] · [Email]
+> [Name], PA-C · [Phone] · [Email]

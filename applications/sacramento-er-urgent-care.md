@@ -24,10 +24,10 @@ Roles (from search, Oct 6, 2026). Confirm each is still open before applying.
 >
 > I hold a Master of Science from Des Moines University and a Bachelor of Science from
 > Indiana University, and I maintain current ACLS and BLS certification. In my current
-> role I [add 1–2 specifics: patient volume, acuity mix, procedures, fast track vs. main ED].
+> role I typically see [confirm unit: 14–20 patients per shift] and [add 1–2 more specifics: acuity mix, procedures, fast track vs. main ED].
 >
 > My California PA license application is in progress, with an expected issue date of
-> [date]. I am available to start [date] and can [start with a defined onboarding or
+> January 2027. I am available to start [date] and can [start with a defined onboarding or
 > proctoring period / take evening or weekend shifts, as the role requires].
 >
 > I would welcome the chance to talk about how I can support your team. My resume is

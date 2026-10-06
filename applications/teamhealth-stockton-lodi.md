@@ -26,7 +26,7 @@ application. The note below does that up front.
 >
 > Two quick questions before I apply: is one year of ED experience enough for this
 > position, and does the site offer an onboarding or mentorship period? My California PA
-> license application is in progress, with an expected issue date of [date].
+> license application is in progress, with an expected issue date of January 2027.
 >
 > Thank you,
 > [Name], PA-C · [Phone] · [Email]

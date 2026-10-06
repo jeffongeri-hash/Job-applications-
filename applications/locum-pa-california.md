@@ -33,7 +33,7 @@
 > am open to the rest of the state for the right assignment.
 >
 > Credentials: PA-C, ACLS, BLS; MS, Des Moines University. California PA license:
-> application in progress, expected [date]. Availability: from [date], [days per week or
+> application in progress, expected January 2027. Availability: from [date], [days per week or
 > assignment length]. Pay target: [rate].
 >
 > Could you share current California openings and the credentialing timeline? My resume is
