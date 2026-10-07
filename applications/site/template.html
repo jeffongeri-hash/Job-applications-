@@ -1,0 +1,411 @@
+<title>Ongeri Job Findings</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Newsreader:opsz,wght@6..72,400;6..72,500&display=swap">
+<style>
+/* Layout: chart-rack. A narrow role list on the left, one open "chart" on the right. Labels are mono like EHR fields;
+   letters are serif like documents; everything else is a plain clinical sans. */
+:root {
+  --bg: #f1f4f5;
+  --surface: #ffffff;
+  --ink: #16222b;
+  --muted: #566672;
+  --line: #d6dde1;
+  --accent: #0f5c8c;
+  --accent-ink: #ffffff;
+  --chip: #e6ecef;
+  --ok: #1d7a45;
+  --warn: #8f5600;
+  --gap: #b3261e;
+  --info: #4a5d6a;
+  --sel: #e3eef6;
+  --sans: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  --serif: "Newsreader", Georgia, "Times New Roman", serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0e1519; --surface: #162128; --ink: #e5edf1; --muted: #92a3ae; --line: #27363f; --accent: #6db6ea;
+    --accent-ink: #08202f; --chip: #1e2c34; --ok: #5cc08b; --warn: #e2aa4c; --gap: #f28b84; --info: #9fb2bd;
+    --sel: #1a2d3a; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0e1519; --surface: #162128; --ink: #e5edf1; --muted: #92a3ae; --line: #27363f; --accent: #6db6ea;
+  --accent-ink: #08202f; --chip: #1e2c34; --ok: #5cc08b; --warn: #e2aa4c; --gap: #f28b84; --info: #9fb2bd;
+  --sel: #1a2d3a; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font-family: var(--sans); font-size: 15px; line-height: 1.5;
+  margin: 0; padding-inline: 16px; padding-block: 0 48px; }
+a { color: var(--accent); }
+button, select, input { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.wrap { max-width: 1240px; margin-inline: auto; }
+
+/* top bar */
+.top { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 4px 24px;
+  padding-block: 20px 12px; }
+.brand { font-size: 20px; font-weight: 600; letter-spacing: -0.01em; margin: 0; }
+.brand small { font-family: var(--mono); font-weight: 400; font-size: 12px; color: var(--muted); margin-left: 10px;
+  letter-spacing: 0.02em; }
+.stats { font-family: var(--mono); font-size: 12px; color: var(--muted); }
+
+details.confirm { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; margin-bottom: 16px; }
+details.confirm summary { cursor: pointer; padding: 10px 14px; font-weight: 500; }
+details.confirm ul { margin: 0; padding: 0 14px 12px 34px; color: var(--muted); }
+details.confirm li { margin-block: 4px; }
+details.confirm b { color: var(--ink); font-weight: 500; }
+
+.grid { display: grid; grid-template-columns: 360px minmax(0, 1fr); gap: 24px; align-items: start; }
+@media (max-width: 860px) {
+  .grid { grid-template-columns: minmax(0, 1fr); }
+  body.has-sel .list-col { display: none; }
+  body:not(.has-sel) .detail-col { display: none; }
+}
+
+/* list column */
+.list-col { position: sticky; top: env(safe-area-inset-top, 0px); max-height: 100vh; display: flex; flex-direction: column;
+  min-width: 0; }
+@media (max-width: 860px) { .list-col { position: static; max-height: none; } }
+.controls { display: grid; gap: 8px; padding-bottom: 10px; }
+.controls input[type=search], .controls select { width: 100%; background: var(--surface); border: 1px solid var(--line);
+  border-radius: 6px; padding: 8px 10px; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { background: var(--chip); border: 1px solid transparent; border-radius: 999px; padding: 3px 10px;
+  font-size: 12.5px; cursor: pointer; }
+.chip[aria-pressed=true] { background: var(--accent); color: var(--accent-ink); }
+.chip .n { font-family: var(--mono); opacity: 0.75; margin-left: 4px; }
+.roles { overflow-y: auto; border: 1px solid var(--line); border-radius: 6px; background: var(--surface); min-height: 0; }
+.grp { font-family: var(--mono); font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted);
+  padding: 10px 14px 6px; background: var(--bg); border-bottom: 1px solid var(--line); position: sticky; top: 0; }
+.role { display: block; width: 100%; text-align: left; background: transparent; border: 0;
+  border-bottom: 1px solid var(--line); padding: 10px 14px; cursor: pointer; }
+.role:hover { background: var(--sel); }
+.role[aria-current=true] { background: var(--sel); box-shadow: inset 3px 0 0 var(--accent); }
+.role .emp { font-weight: 600; }
+.role .ttl { color: var(--ink); display: block; }
+.role .sub { font-family: var(--mono); font-size: 12px; color: var(--muted); display: flex; flex-wrap: wrap; gap: 2px 10px;
+  margin-top: 3px; }
+.role .flags { float: right; font-family: var(--mono); font-size: 11.5px; display: flex; gap: 6px; margin-left: 8px; }
+.flag-gap { color: var(--gap); } .flag-warn { color: var(--warn); }
+.role.done .emp, .role.skip .emp { text-decoration: line-through; text-decoration-color: var(--muted); }
+.role.skip { opacity: 0.55; }
+.empty { padding: 20px 14px; color: var(--muted); }
+
+/* detail column */
+.detail-col { min-width: 0; }
+.back { display: none; background: none; border: 0; color: var(--accent); padding: 6px 0 12px; cursor: pointer; }
+@media (max-width: 860px) { .back { display: inline-block; } }
+.kicker { font-family: var(--mono); font-size: 12px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); }
+h1.role-title { font-size: 26px; line-height: 1.2; letter-spacing: -0.015em; margin: 6px 0 4px; text-wrap: balance; }
+.meta { display: flex; flex-wrap: wrap; gap: 4px 18px; color: var(--muted); font-size: 14px; }
+.meta b { color: var(--ink); font-weight: 500; }
+.actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin: 14px 0; }
+.btn { display: inline-flex; align-items: center; gap: 6px; background: var(--accent); color: var(--accent-ink);
+  border: 1px solid var(--accent); border-radius: 6px; padding: 7px 14px; text-decoration: none; cursor: pointer;
+  font-weight: 500; }
+.btn.alt { background: transparent; color: var(--accent); }
+.btn:hover { filter: brightness(1.08); }
+.nolink { font-size: 14px; color: var(--muted); }
+.status { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 6px 8px; }
+
+.fit { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 4px 14px; margin-bottom: 18px; }
+.fit h2 { font-family: var(--mono); font-size: 12px; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 500;
+  color: var(--muted); margin: 10px 0 4px; }
+.fit ul { list-style: none; margin: 0; padding: 0 0 8px; }
+.fit li { display: grid; grid-template-columns: 22px minmax(0, 1fr); gap: 8px; padding: 5px 0; border-top: 1px solid var(--line); }
+.fit li:first-child { border-top: 0; }
+.mark { font-family: var(--mono); font-weight: 500; width: 20px; height: 20px; border-radius: 4px; display: grid;
+  place-items: center; font-size: 12px; border: 1px solid currentColor; margin-top: 2px; }
+.s-ok { color: var(--ok); } .s-warn { color: var(--warn); } .s-gap { color: var(--gap); } .s-info { color: var(--info); }
+.fit li span.t { color: var(--ink); }
+
+.tabs { display: flex; gap: 2px; border-bottom: 1px solid var(--line); margin-bottom: 16px; overflow-x: auto; }
+.tab { background: none; border: 0; border-bottom: 2px solid transparent; padding: 8px 14px; cursor: pointer;
+  color: var(--muted); font-weight: 500; white-space: nowrap; }
+.tab[aria-selected=true] { color: var(--ink); border-bottom-color: var(--accent); }
+
+.note { background: var(--chip); border-radius: 6px; padding: 8px 12px; font-size: 13.5px; color: var(--muted); margin-bottom: 14px; }
+.posting { max-width: 74ch; }
+.posting p { margin: 0 0 10px; }
+.posting ul { margin: 0 0 10px; padding-left: 20px; }
+.posting h3 { font-size: 14px; margin: 16px 0 6px; }
+
+.docbar { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+.doc { background: var(--surface); border: 1px solid var(--line); border-radius: 4px; padding: 28px clamp(16px, 4vw, 44px);
+  max-width: 78ch; }
+.doc.letter { font-family: var(--serif); font-size: 17px; line-height: 1.55; }
+.doc.letter p { margin: 0 0 14px; }
+.doc.letter .subj { font-family: var(--mono); font-size: 13px; color: var(--muted); margin-bottom: 14px; }
+.doc.letter .sign p { margin: 0; }
+.resume .rname { text-align: center; font-weight: 600; font-size: 20px; letter-spacing: 0.02em; }
+.resume .rcontact { text-align: center; color: var(--muted); font-size: 13px; margin-bottom: 8px; overflow-wrap: anywhere; }
+.resume h3 { font-size: 12.5px; letter-spacing: 0.1em; margin: 18px 0 6px; padding-bottom: 3px; border-bottom: 1px solid var(--line); }
+.resume p { margin: 0 0 6px; font-size: 14px; overflow-wrap: anywhere; }
+.resume ul { margin: 0 0 6px; padding-left: 18px; font-size: 14px; }
+.resume li { margin-bottom: 3px; }
+.resume .ent { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 2px 12px; font-size: 14px; margin-top: 8px; }
+.resume .ent b { font-weight: 600; }
+.resume .ent span { color: var(--muted); font-family: var(--mono); font-size: 12.5px; }
+.resume .esub { color: var(--muted); font-size: 13.5px; margin-bottom: 4px; }
+.toast { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(18px + env(safe-area-inset-bottom, 0px));
+  background: var(--ink); color: var(--bg); padding: 8px 16px; border-radius: 6px; font-size: 14px; }
+@media (prefers-reduced-motion: no-preference) { .btn { transition: filter .15s; } }
+
+@media print {
+  body { background: #fff; color: #000; padding: 0; }
+  .top, details.confirm, .list-col, .back, .actions, .fit, .tabs, .docbar, .note, .toast, .kicker, h1.role-title, .meta { display: none !important; }
+  .grid { display: block; }
+  .doc { border: 0; padding: 0; max-width: none; background: #fff; color: #000; }
+  body.print-letter .resume-wrap, body.print-resume .letter-wrap { display: none !important; }
+}
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <h1 class="brand">Job findings<small id="who"></small></h1>
+    <div class="stats" id="stats"></div>
+  </header>
+
+  <details class="confirm" id="confirm">
+    <summary>Confirm 5 things before sending: relocation, CCRA status, CRA history, license, nothing sent yet</summary>
+    <ul>
+      <li><b>Relocation.</b> Every California letter says you are planning to relocate to Northern California. Edit it if that is not right.</li>
+      <li><b>CCRA.</b> Your resume says "2023 to present". You told me it is expired, so these documents say "earned 2023" and the CRA letters say you plan to recertify.</li>
+      <li><b>CRA history.</b> The research letters say you worked as a CRA before PA school. Add the employer and dates to your resume so the claim can be checked.</li>
+      <li><b>License.</b> Letters state that your California PA license application is in process, expected January 2027.</li>
+      <li><b>Nothing is sent.</b> These are drafts. Read each posting, then apply yourself.</li>
+    </ul>
+  </details>
+
+  <div class="grid">
+    <section class="list-col" aria-label="Roles">
+      <div class="controls">
+        <input type="search" id="q" placeholder="Search employer, title or city" aria-label="Search roles">
+        <div class="chips" id="chips"></div>
+        <select id="sort" aria-label="Sort roles">
+          <option value="group">Group, as found</option>
+          <option value="fit">Fewest gaps first</option>
+          <option value="new">Newest posting first</option>
+        </select>
+      </div>
+      <div class="roles" id="roles"></div>
+    </section>
+
+    <main class="detail-col" id="detail" aria-live="polite"></main>
+  </div>
+</div>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+const DATA = /*__DATA__*/null;
+const LOCAL = location.protocol === "http:" && /^(localhost|127\.0\.0\.1)$/.test(location.hostname);
+const GROUP_ORDER = ["Emergency & urgent care", "Specialty clinics", "Primary care & outpatient", "Exams & virtual",
+                     "Locum & agencies", "Clinical research", "Federal & military"];
+const MARK = { ok: "✓", warn: "!", gap: "×", info: "i" };
+const STATUS = [["todo", "To apply"], ["applied", "Applied"], ["interview", "Interviewing"], ["skip", "Skipped"]];
+
+const $ = (id) => document.getElementById(id);
+function h(tag, props, ...kids) {
+  const el = document.createElement(tag);
+  for (const [k, v] of Object.entries(props || {})) {
+    if (v == null || v === false) continue;
+    if (k === "class") el.className = v;
+    else if (k === "text") el.textContent = v;
+    else if (k.startsWith("on")) el.addEventListener(k.slice(2), v);
+    else el.setAttribute(k, v === true ? "" : v);
+  }
+  for (const kid of kids.flat()) if (kid != null) el.append(kid.nodeType ? kid : document.createTextNode(kid));
+  return el;
+}
+
+/* per-viewer convenience state: status of each role, remembered in this browser only */
+let saved = {};
+try { saved = JSON.parse(localStorage.getItem("ongeri-job-status-v1") || "{}"); } catch (e) { saved = {}; }
+function setStatus(id, v) {
+  saved[id] = v;
+  try { localStorage.setItem("ongeri-job-status-v1", JSON.stringify(saved)); } catch (e) {}
+}
+
+const state = { q: "", group: "All", sort: "group", tab: "posting" };
+const roles = DATA.roles;
+const count = (r, s) => r.fit.filter((f) => f[0] === s).length;
+
+function toast(msg) {
+  const t = $("toast"); t.textContent = msg; t.hidden = false;
+  clearTimeout(toast._t); toast._t = setTimeout(() => (t.hidden = true), 1800);
+}
+async function copy(text, label) {
+  try { await navigator.clipboard.writeText(text); toast(label + " copied"); }
+  catch (e) {
+    const ta = h("textarea", { "aria-hidden": "true", style: "position:fixed;opacity:0" }); ta.value = text;
+    document.body.append(ta); ta.select();
+    let ok = false; try { ok = document.execCommand("copy"); } catch (e2) {}
+    ta.remove(); toast(ok ? label + " copied" : "Select the text and copy it");
+  }
+}
+
+/* ---------- list ---------- */
+function visible() {
+  const q = state.q.trim().toLowerCase();
+  let rs = roles.filter((r) => (state.group === "All" || r.group === state.group) &&
+    (!q || (r.employer + " " + r.title + " " + r.location + " " + r.group).toLowerCase().includes(q)));
+  if (state.sort === "group") rs = rs.slice().sort((x, y) => GROUP_ORDER.indexOf(x.group) - GROUP_ORDER.indexOf(y.group));
+  if (state.sort === "fit") rs = rs.slice().sort((a, b) => count(a, "gap") - count(b, "gap") || count(a, "warn") - count(b, "warn"));
+  if (state.sort === "new") rs = rs.slice().sort((a, b) => (b.posted || "").localeCompare(a.posted || ""));
+  return rs;
+}
+function renderChips() {
+  const box = $("chips"); box.replaceChildren();
+  const mk = (name, n) => h("button", { class: "chip", type: "button", "aria-pressed": String(state.group === name),
+    onclick: () => { state.group = name; renderChips(); renderList(); } }, name, h("span", { class: "n", text: n }));
+  box.append(mk("All", roles.length));
+  for (const g of GROUP_ORDER) { const n = roles.filter((r) => r.group === g).length; if (n) box.append(mk(g, n)); }
+}
+function renderList() {
+  const box = $("roles"); box.replaceChildren();
+  const rs = visible();
+  if (!rs.length) { box.append(h("div", { class: "empty", text: "No roles match." })); return; }
+  const sel = location.hash.slice(1);
+  let lastGroup = null;
+  for (const r of rs) {
+    if (state.sort === "group" && r.group !== lastGroup) { box.append(h("div", { class: "grp", text: r.group })); lastGroup = r.group; }
+    const st = saved[r.id] || "todo";
+    const g = count(r, "gap"), w = count(r, "warn");
+    box.append(h("button", { class: "role " + (st === "applied" || st === "interview" ? "done" : st === "skip" ? "skip" : ""),
+      type: "button", "aria-current": String(sel === r.id), onclick: () => { location.hash = r.id; } },
+      h("span", { class: "flags" }, g ? h("span", { class: "flag-gap", title: "Requirements you do not meet", text: "×" + g }) : null,
+        w ? h("span", { class: "flag-warn", title: "Things to check", text: "!" + w }) : null),
+      h("span", { class: "emp", text: r.employer }),
+      h("span", { class: "ttl", text: r.title }),
+      h("span", { class: "sub" }, h("span", { text: r.location }), h("span", { text: r.pay }))));
+  }
+}
+
+/* ---------- posting text ---------- */
+function inline(text) {
+  const frag = document.createDocumentFragment();
+  text.split(/(\*\*[^*]+\*\*)/g).forEach((part) => {
+    if (/^\*\*[^*]+\*\*$/.test(part)) frag.append(h("b", { text: part.slice(2, -2) })); else if (part) frag.append(part);
+  });
+  return frag;
+}
+function renderPosting(text) {
+  const box = h("div", { class: "posting" });
+  let ul = null;
+  for (const raw of text.split("\n")) {
+    const line = raw.trim();
+    if (!line) { ul = null; continue; }
+    const li = line.match(/^(?:[*•\-]\s+)(.*)$/);
+    if (li) { if (!ul) { ul = h("ul"); box.append(ul); } ul.append(h("li", {}, inline(li[1]))); continue; }
+    ul = null;
+    const head = line.match(/^\*\*([^*]+)\*\*:?$/);
+    if (head && head[1].length <= 80) box.append(h("h3", { text: head[1] })); else box.append(h("p", {}, inline(line)));
+  }
+  return box;
+}
+
+/* ---------- documents ---------- */
+function letterEl(r) {
+  const L = r.letter;
+  const el = h("div", { class: "doc letter", id: "letter-doc" });
+  if (r.kind === "inquiry") el.append(h("div", { class: "subj", text: "Subject: " + L.subject }));
+  el.append(h("p", { text: L.greeting }));
+  L.paragraphs.forEach((t) => el.append(h("p", { text: t })));
+  const sign = h("div", { class: "sign" }); L.signoff.forEach((t) => sign.append(h("p", { text: t })));
+  el.append(sign);
+  return el;
+}
+function resumeEl(r) {
+  const R = r.resume;
+  const el = h("div", { class: "doc resume", id: "resume-doc" },
+    h("div", { class: "rname", text: R.header.name }), h("div", { class: "rcontact", text: R.header.contact }));
+  let ul = null;
+  for (const b of R.blocks) {
+    if (b.t !== "li") ul = null;
+    if (b.t === "sec") el.append(h("h3", { text: b.x }));
+    else if (b.t === "p") el.append(h("p", { text: b.x }));
+    else if (b.t === "li") { if (!ul) { ul = h("ul"); el.append(ul); } ul.append(h("li", { text: b.x })); }
+    else if (b.t === "entry") {
+      el.append(h("div", { class: "ent" }, h("b", { text: b.left }), h("span", { text: b.right })));
+      if (b.sub) el.append(h("div", { class: "esub", text: b.sub }));
+    }
+  }
+  return el;
+}
+function docActions(r, which) {
+  const bar = h("div", { class: "docbar" },
+    h("button", { class: "btn", type: "button", onclick: () => copy(which === "letter" ? r.letter.text : r.resume.text,
+      which === "letter" ? "Cover letter" : "Resume") }, which === "letter" ? "Copy letter" : "Copy resume text"));
+  if (LOCAL) {
+    bar.append(h("a", { class: "btn alt", href: r.docs[which], download: "" }, "Download .docx"));
+    bar.append(h("button", { class: "btn alt", type: "button", onclick: () => {
+      document.body.classList.add(which === "letter" ? "print-letter" : "print-resume"); window.print();
+      setTimeout(() => document.body.classList.remove("print-letter", "print-resume"), 500); } }, "Print / save as PDF"));
+  }
+  return bar;
+}
+
+/* ---------- detail ---------- */
+function renderDetail() {
+  const box = $("detail"); box.replaceChildren();
+  const id = location.hash.slice(1);
+  const r = roles.find((x) => x.id === id);
+  document.body.classList.toggle("has-sel", !!r);
+  if (!r) {
+    box.append(h("div", { class: "empty" }, "Pick a role from the list. Each one has the posting, a fit check against your resume, a cover letter and a tailored resume."));
+    return;
+  }
+  const st = saved[r.id] || "todo";
+  const select = h("select", { class: "status", id: "status", "aria-label": "Application status",
+    onchange: (e) => { setStatus(r.id, e.target.value); renderList(); } },
+    STATUS.map(([v, l]) => h("option", { value: v, selected: v === st, text: l })));
+  const open = r.url
+    ? h("a", { class: "btn", href: r.url, target: "_blank", rel: "noopener noreferrer" }, "Open posting ↗")
+    : h("span", { class: "nolink", text: "No direct link captured. " + (r.searchNote || "Search the employer's careers page.") });
+
+  box.append(
+    h("button", { class: "back", type: "button", onclick: () => { location.hash = ""; } }, "← All roles"),
+    h("div", { class: "kicker", text: r.group + "  ·  " + r.source }),
+    h("h1", { class: "role-title", text: r.title }),
+    h("div", { class: "meta" },
+      h("span", {}, h("b", { text: r.employer })), h("span", { text: r.location }), h("span", { text: r.pay }),
+      r.posted ? h("span", { text: "Posted " + r.posted }) : null,
+      r.deadline ? h("span", {}, h("b", { text: r.deadline })) : null),
+    h("div", { class: "actions" }, open, select),
+    h("section", { class: "fit" }, h("h2", { text: "Fit check against your resume" }),
+      h("ul", {}, r.fit.map(([s, t]) => h("li", {}, h("span", { class: "mark s-" + s, text: MARK[s] }), h("span", { class: "t", text: t }))))));
+
+  const tabs = [["posting", "Posting"], ["letter", "Cover letter"], ["resume", "Resume"]];
+  const bar = h("div", { class: "tabs", role: "tablist" });
+  const body = h("div", { id: "tabbody" });
+  const draw = () => {
+    bar.replaceChildren(...tabs.map(([k, l]) => h("button", { class: "tab", role: "tab", type: "button",
+      "aria-selected": String(state.tab === k), onclick: () => { state.tab = k; draw(); } }, l)));
+    body.replaceChildren();
+    if (state.tab === "posting") {
+      if (r.descKind === "summary") body.append(h("div", { class: "note", text: "This is a summary from the earlier search. The full posting text was not captured, so open the posting to read it." }));
+      body.append(renderPosting(r.description));
+    } else if (state.tab === "letter") {
+      body.append(h("div", { class: "letter-wrap" }, docActions(r, "letter"), letterEl(r)));
+    } else {
+      if (!LOCAL) body.append(h("div", { class: "note", text: "Word versions of every letter and resume are in applications/site/documents in the repo, or run the site locally (see the README there) to download them from this page." }));
+      body.append(h("div", { class: "resume-wrap" }, docActions(r, "resume"), resumeEl(r)));
+    }
+  };
+  draw();
+  box.append(bar, body);
+  window.scrollTo({ top: 0 });
+}
+
+/* ---------- boot ---------- */
+function stats() {
+  const li = roles.filter((r) => r.descKind === "full").length;
+  $("who").textContent = DATA.applicant.name;
+  $("stats").textContent = roles.length + " roles  ·  " + li + " with full posting text  ·  built " + DATA.generated;
+}
+$("q").addEventListener("input", (e) => { state.q = e.target.value; renderList(); });
+$("sort").addEventListener("change", (e) => { state.sort = e.target.value; renderList(); });
+window.addEventListener("hashchange", () => { renderList(); renderDetail(); });
+stats(); renderChips(); renderList(); renderDetail();
+</script>
