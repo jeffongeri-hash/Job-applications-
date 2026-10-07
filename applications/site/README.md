@@ -41,10 +41,17 @@ Letters and resumes are assembled only from those two files, so a fact you fix t
 
 ## Confirm before sending
 
-- **Relocation:** California letters say you are planning to relocate to Northern California.
-- **CCRA:** your resume says "2023 to present"; these documents say "earned 2023" because you said it is expired.
-  CRA letters say you plan to recertify.
-- **CRA history:** research letters say you worked as a CRA before PA school. Add the employer and dates.
+- **CRA role:** every resume now lists Clinical Research Associate, breast/oncology, IU Simon Comprehensive Cancer
+  Center, 2022 to 2023. Only the title and years are known, so the entry has no bullets. Add 2 to 3 duties in
+  `tools/facts.py` (`CRA_JOB`) and rebuild.
+- **CCRA:** shown as "earned 2023; expired, recertification in process".
+- **Move:** letters say you are planning to move to Sacramento or the greater Sacramento area.
 - **License:** letters say the California PA license application is in process, expected January 2027.
 
 Postings change quickly. Confirm each is still open.
+
+## Downloads
+
+- On `localhost` each letter and resume has a **Download .docx** link and a **Print / save as PDF** button.
+- In the published claude.ai version the same **Download .docx** button asks you to confirm, then saves the file.
+- Either way, all 100 files are also in `documents/`.

@@ -59,13 +59,13 @@ EDUCATION = [
      "Indiana University – College of Arts & Sciences", "Bloomington, IN"),
 ]
 
-# Certifications. The resume says CCRA "2023 to present". The applicant told us it is expired,
-# so the generated documents say "CCRA – earned 2023" and the page asks them to confirm status.
+# Certifications. The resume says CCRA "2023 to present"; the applicant confirmed it is expired and that
+# recertification is in process, so the generated documents say so.
 CERTS = [
     "Advanced Cardiac Life Support (ACLS) – 2023 to present",
     "Basic Life Support (BLS) – 2023 to present",
     "Advanced Trauma Life Support (ATLS) – October 2025 to October 2029",
-    "Certified Clinical Research Associate (CCRA) – earned 2023",
+    "Certified Clinical Research Associate (CCRA) – earned 2023; expired, recertification in process",
     "California PA license – application in progress, expected January 2027",
 ]
 
@@ -119,4 +119,13 @@ VOLUNTEER = "Boys Reaching for Opportunities in Science (BROS) – Volunteer, 20
 LICENSE_LINE = (
     "My California PA license application is in process, with an expected issue date of January 2027."
 )
-RELOCATE_LINE = "I am planning to relocate to Northern California."
+RELOCATE_LINE = "I am planning to move to Sacramento or the greater Sacramento area."
+
+# Prior CRA role, stated by the applicant. No duties were given, so the resume entry has no bullets.
+CRA_JOB = {
+    "title": "Clinical Research Associate – Breast/Oncology",
+    "dates": "2022 – 2023",
+    "org": "IU Simon Comprehensive Cancer Center",
+}
+CRA_SENTENCE = ("From 2022 to 2023 I worked as a breast/oncology Clinical Research Associate at the IU Simon "
+                "Comprehensive Cancer Center")

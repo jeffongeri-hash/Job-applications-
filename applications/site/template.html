@@ -168,13 +168,13 @@ h1.role-title { font-size: 26px; line-height: 1.2; letter-spacing: -0.015em; mar
   </header>
 
   <details class="confirm" id="confirm">
-    <summary>Confirm 5 things before sending: relocation, CCRA status, CRA history, license, nothing sent yet</summary>
+    <summary>Before you send: add your CRA duties, check license timing, nothing has been sent</summary>
     <ul>
-      <li><b>Relocation.</b> Every California letter says you are planning to relocate to Northern California. Edit it if that is not right.</li>
-      <li><b>CCRA.</b> Your resume says "2023 to present". You told me it is expired, so these documents say "earned 2023" and the CRA letters say you plan to recertify.</li>
-      <li><b>CRA history.</b> The research letters say you worked as a CRA before PA school. Add the employer and dates to your resume so the claim can be checked.</li>
+      <li><b>CRA role.</b> Added to every resume: Clinical Research Associate, breast/oncology, IU Simon Comprehensive Cancer Center, 2022 to 2023. I only have the title and years, so the entry has no bullets. Add 2 to 3 duties (for example monitoring visits, regulatory binders, or sites covered) and regenerate.</li>
+      <li><b>CCRA.</b> Shown as "earned 2023; expired, recertification in process" on resumes. Research letters say the same.</li>
+      <li><b>Move.</b> Letters say you are planning to move to Sacramento or the greater Sacramento area. Bay Area, Modesto and Stockton roles show the distance in their fit check.</li>
       <li><b>License.</b> Letters state that your California PA license application is in process, expected January 2027.</li>
-      <li><b>Nothing is sent.</b> These are drafts. Read each posting, then apply yourself.</li>
+      <li><b>Drafts only.</b> Read each posting, then apply yourself.</li>
     </ul>
   </details>
 
@@ -199,6 +199,7 @@ h1.role-title { font-size: 26px; line-height: 1.2; letter-spacing: -0.015em; mar
 
 <script>
 const DATA = /*__DATA__*/null;
+const DOCS = /*__DOCS__*/null; /* base64 .docx files, present only in the published page */
 const LOCAL = location.protocol === "http:" && /^(localhost|127\.0\.0\.1)$/.test(location.hostname);
 const GROUP_ORDER = ["Emergency & urgent care", "Specialty clinics", "Primary care & outpatient", "Exams & virtual",
                      "Locum & agencies", "Clinical research", "Federal & military"];
@@ -217,6 +218,29 @@ function h(tag, props, ...kids) {
   }
   for (const kid of kids.flat()) if (kid != null) el.append(kid.nodeType ? kid : document.createTextNode(kid));
   return el;
+}
+
+/* Word downloads. On localhost these are plain links. In the published page a file save goes through the viewer's
+   "downloads" capability, which asks the viewer to confirm. */
+let downloads = null;
+try {
+  if (window.claude && window.claude.use && DOCS) {
+    window.claude.use("downloads").then((d) => { if (d) { downloads = d; if (location.hash) renderDetail(); } }, () => {});
+  }
+} catch (e) {}
+function docxBlob(b64) {
+  const bin = atob(b64), u8 = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) u8[i] = bin.charCodeAt(i);
+  return new Blob([u8], { type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document" });
+}
+async function saveDocx(r, which) {
+  try {
+    await downloads.save({ filename: r.docs[which].split("/").pop(), data: docxBlob(DOCS[r.id][which]) });
+    toast("Saved");
+  } catch (e) {
+    if (e && e.code === "declined") return;
+    toast(e && e.code === "rate_limited" ? "Wait a moment and try again" : "Download is not available here");
+  }
 }
 
 /* per-viewer convenience state: status of each role, remembered in this browser only */
@@ -337,6 +361,9 @@ function docActions(r, which) {
   const bar = h("div", { class: "docbar" },
     h("button", { class: "btn", type: "button", onclick: () => copy(which === "letter" ? r.letter.text : r.resume.text,
       which === "letter" ? "Cover letter" : "Resume") }, which === "letter" ? "Copy letter" : "Copy resume text"));
+  if (!LOCAL && downloads && DOCS && DOCS[r.id]) {
+    bar.append(h("button", { class: "btn alt", type: "button", onclick: () => saveDocx(r, which) }, "Download .docx"));
+  }
   if (LOCAL) {
     bar.append(h("a", { class: "btn alt", href: r.docs[which], download: "" }, "Download .docx"));
     bar.append(h("button", { class: "btn alt", type: "button", onclick: () => {
@@ -389,7 +416,6 @@ function renderDetail() {
     } else if (state.tab === "letter") {
       body.append(h("div", { class: "letter-wrap" }, docActions(r, "letter"), letterEl(r)));
     } else {
-      if (!LOCAL) body.append(h("div", { class: "note", text: "Word versions of every letter and resume are in applications/site/documents in the repo, or run the site locally (see the README there) to download them from this page." }));
       body.append(h("div", { class: "resume-wrap" }, docActions(r, "resume"), resumeEl(r)));
     }
   };

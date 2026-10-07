@@ -74,8 +74,8 @@ EVIDENCE = {
     "onc": (
         "My hematology/oncology rotation was at MD Anderson in Houston, and my research background includes a "
         "peer-reviewed publication on pharmacogenomics testing in sickle cell anemia (Pharmacogenomics, 2022). "
-        "In the Emergency Department I manage 15–25 patients per shift with acute and undifferentiated "
-        "presentations and work closely with consultants."
+        + F.CRA_SENTENCE + ". In the Emergency Department I now manage 15–25 patients per shift with acute and "
+        "undifferentiated presentations and work closely with consultants."
     ),
     "bh": (
         "I completed a behavioral and mental health rotation in Des Moines, Iowa, and in the Emergency Department "
@@ -93,15 +93,16 @@ EVIDENCE = {
         "patients per shift, and I hold ACLS, BLS and ATLS certification."
     ),
     "research": (
-        "Before PA school I worked as a Clinical Research Associate, and I earned the CCRA credential in 2023. I "
-        "completed four research assistant internships, including pharmacogenomics research in sickle cell "
+        F.CRA_SENTENCE + ", and I earned the CCRA credential in 2023. I "
+        "also completed four research assistant internships, including pharmacogenomics research in sickle cell "
         "anemia, MEG/EEG neuroscience research, and neuroimaging, and I am a co-author on two peer-reviewed "
         "publications (Pharmacogenomics, 2022; Mathematical Thinking and Learning, 2020). As a PA-C assessing "
         "15–25 patients per shift in an emergency department, I also bring a clinician's view of the patient "
         "safety and clinical judgment that trials depend on."
     ),
 }
-EVIDENCE["cra"] = EVIDENCE["research"] + " My CCRA credential has lapsed, and I plan to recertify."
+EVIDENCE["research"] += " My CCRA credential has expired and recertification is in process."
+EVIDENCE["cra"] = EVIDENCE["research"]
 
 # ----------------------------------------------------------------------------- letters
 def letter(r):
@@ -196,8 +197,9 @@ SUMMARY = {
              "I&D, epistaxis management, fracture management, and joint reduction. ATLS, ACLS and BLS certified."),
     "gi": ("Independent management of GI and GU presentations in the ED, with internal medicine and surgery training "
            "and emergency procedural skills. ACLS/BLS/ATLS certified."),
-    "onc": ("Hematology/oncology rotation at MD Anderson (Houston, TX). Published clinical researcher with expertise in "
-            "pharmacogenomics and neuroscience. ACLS/BLS/ATLS certified."),
+    "onc": ("Hematology/oncology rotation at MD Anderson (Houston, TX) and prior breast/oncology Clinical Research "
+            "Associate at the IU Simon Comprehensive Cancer Center (2022–2023). Published clinical researcher with "
+            "expertise in pharmacogenomics and neuroscience. ACLS/BLS/ATLS certified."),
     "bh": ("Behavioral and mental health rotation, with independent evaluation of acute and undifferentiated "
            "presentations in the ED. ACLS/BLS/ATLS certified."),
     "exam": ("Focused physical assessment and accurate documentation of findings, with training in analyzing data and "
@@ -206,9 +208,10 @@ SUMMARY = {
               "Independent emergency procedures including laceration repair, I&D, fracture management, and joint "
               "reduction. ACLS/BLS/ATLS certified."),
 }
-RESEARCH_S1 = ("Physician Assistant (PA-C) with a clinical research background: Certified Clinical Research Associate "
-               "(CCRA, earned 2023), four research assistant internships, and two peer-reviewed publications. Active "
-               "clinical experience in a high-volume emergency department.")
+RESEARCH_S1 = ("Physician Assistant (PA-C) with a clinical research background: breast/oncology Clinical Research "
+               "Associate at the IU Simon Comprehensive Cancer Center (2022–2023), CCRA earned 2023 (recertification in "
+               "process), four research assistant internships, and two peer-reviewed publications. Active clinical "
+               "experience in a high-volume emergency department.")
 
 
 def resume(r):
@@ -216,8 +219,6 @@ def resume(r):
     research_first = track in ("research", "cra")
     if research_first:
         summary = RESEARCH_S1
-        if track == "cra":
-            summary += " CCRA recertification planned."
         summary += " Seeking the " + r["title"] + " position at " + r["employer"] + "."
     else:
         summary = CLINICAL_S1 + " " + SUMMARY[track] + " Seeking the " + r["title"] + " position at " + r["employer"] + "."
@@ -247,6 +248,7 @@ def resume(r):
         sec("CERTIFICATIONS & LICENSURE")
         for x in F.CERTS: li(x)
         sec("PROFESSIONAL EXPERIENCE")
+        entry(F.CRA_JOB["title"], F.CRA_JOB["dates"], F.CRA_JOB["org"])
         entry(F.JOB["title"], F.JOB["dates"], F.JOB["org"] + "  |  " + F.JOB["where"])
         for x in bullets: li(x)
         sec("EDUCATION")
@@ -256,6 +258,7 @@ def resume(r):
         sec("PROFESSIONAL EXPERIENCE")
         entry(F.JOB["title"], F.JOB["dates"], F.JOB["org"] + "  |  " + F.JOB["where"])
         for x in bullets: li(x)
+        entry(F.CRA_JOB["title"], F.CRA_JOB["dates"], F.CRA_JOB["org"])
         sec("EDUCATION")
         for t, d, o, w in F.EDUCATION: entry(t, d, o + "  |  " + w)
         sec("CERTIFICATIONS & LICENSURE")
@@ -390,9 +393,14 @@ if __name__ == "__main__":
     tpl = (SITE / "template.html").read_text()
     blob = json.dumps(payload, ensure_ascii=False).replace("</", "<\\/")
     assert "/*__DATA__*/null" in tpl
+    import base64
     page = tpl.replace("/*__DATA__*/null", blob)
-    # artifact.html is the fragment published to claude.ai (the platform adds the document shell).
-    (SITE / "artifact.html").write_text(page)
+    # artifact.html is the fragment published to claude.ai (the platform adds the document shell). It also carries
+    # the .docx files as base64, because a published page cannot link to files in the repo.
+    docs = {r["id"]: {k: base64.b64encode((SITE / r["docs"][k]).read_bytes()).decode() for k in ("letter", "resume")}
+            for r in data}
+    (SITE / "artifact.html").write_text(page.replace("/*__DOCS__*/null", json.dumps(docs)))
+    page = page.replace("/*__DOCS__*/null", "null")
     # index.html is the same page with its own shell, for serving locally.
     cut = page.index("</style>") + len("</style>")
     shell = ('<!doctype html>\n<html lang="en">\n<head>\n<meta charset="utf-8">\n'

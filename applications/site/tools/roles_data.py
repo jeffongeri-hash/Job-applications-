@@ -9,7 +9,7 @@ Fields
   desc      "LI:<n>" pulls the full posting text from linkedin_roles.json, otherwise a summary
   hook      one sentence about why this employer or role, taken from the posting or search result
   gap       optional candid sentence for a requirement the applicant does not yet meet
-  relocate  False for remote or Southern California roles where the Northern California line does not apply
+  relocate  False for remote or Southern California roles where the "moving to the Sacramento area" line does not apply
   fit       [(status, text)], status in ok / warn / gap / info
   annual    top of the pay range as a yearly figure, used for the "below your $110k minimum" check
 """
@@ -156,18 +156,20 @@ ROLES = [
          hook="A high-volume pulmonary research program running clinical trials and disease registries is a chance to "
               "use both my clinical and my research background.",
          fit=[("warn", "Coordinator-level pay, well below a PA salary."),
-              ("ok", "Wants 1+ year of clinical research experience. You have your CRA work, four research internships "
-                     "and two publications. Add the CRA employer and dates to the resume."),
+              ("ok", "Wants 1+ year of clinical research experience. You have your breast/oncology CRA role at IU Simon "
+                     "(2022–2023), four research internships and two publications."),
               ("ok", "Pulmonary matches your COPD and respiratory ED experience.")]),
 
     dict(id="epic-care-med-onc-app", group=G_SPEC, kind="pa", track="onc", desc="LI:11",
          title="Medical Oncology, Advanced Practice Provider (NP or PA)", employer="Epic Care / The US Oncology Network",
          location="Pleasant Hill, CA", pay="$145–175k/yr", annual=175000, posted="2026-10-04", source=LI,
          hook="Epic Care's physician-led, multi-specialty group in the East Bay, with a medical oncology team that needs an "
-              "advanced practice provider, is where I would like to use my MD Anderson rotation.",
+              "advanced practice provider, is where I would like to use my MD Anderson rotation and my breast/oncology "
+              "research experience.",
          fit=[LIC, ("warn", "Requires prescriptive authorization and an active DEA license. Both follow the California "
                             "license."),
-              ("ok", "Oncology experience preferred but not required. You have a hematology/oncology rotation at MD Anderson."),
+              ("ok", "Oncology experience preferred but not required. You have a hematology/oncology rotation at MD Anderson "
+                     "and a breast/oncology CRA role at IU Simon (2022–2023)."),
               ("ok", "Pay is above your minimum.")]),
 
     dict(id="alignment-care-anywhere-modesto", group=G_PRIM, kind="pa", track="primary", desc="LI:12",
@@ -223,10 +225,10 @@ ROLES = [
          title="Clinical Research Coordinator (Oncology)", employer="SQRL",
          location="Walnut Creek, CA (on site Mon–Fri)", pay="$37–48/hr", annual=99840, posted="2026-10-05", source=LI,
          hook="A fast-growing network of clinical research sites running oncology trials is a natural place to combine "
-              "my MD Anderson rotation with my research training.",
+              "my breast/oncology CRA experience at IU Simon with my MD Anderson rotation.",
          fit=[("warn", "Coordinator-level pay, below a PA salary."),
               ("ok", "Benefits listed: 15 days PTO, 10 holidays, health/dental/vision, 4% 401(k) match."),
-              ("ok", "Oncology matches your MD Anderson rotation.")]),
+              ("ok", "Oncology matches your breast/oncology CRA role at IU Simon and your MD Anderson rotation.")]),
 
     dict(id="redbock-crc-pleasanton", group=G_RES, kind="research", track="research", desc="LI:18",
          title="Clinical Research Coordinator (part-time, 20–30 hrs/week)", employer="Redbock, an NES Fircroft company",
@@ -334,10 +336,10 @@ ROLES = [
          title="Clinical Research Associate I, Southern California (Dermatology)", employer="AbbVie",
          location="Los Angeles, CA", pay="Not listed", annual=None, posted="2026-10-06", source=IND, relocate=False,
          url="https://to.indeed.com/aaczlyzllgx7",
-         hook="AbbVie's dermatology CRA I role combines monitoring with a therapeutic area where I have clinical "
-              "training from my dermatology rotation.",
-         fit=[("warn", "Your CCRA is expired per your own note; the resume now says 'earned 2023'. Recertify before "
-                       "applying."),
+         hook="AbbVie's dermatology CRA I role fits my CRA experience and the clinical training from my dermatology "
+              "rotation.",
+         fit=[("warn", "CCRA is expired and recertification is in process; the letter says so. Finishing it first would "
+                       "strengthen this application."),
               ("ok", "Entry-level CRA role: the most realistic CRA target found."),
               ("warn", "Los Angeles: far from Sacramento, with field travel.")]),
 
@@ -351,7 +353,7 @@ ROLES = [
               "appeals to my clinical and research training.",
          fit=[("warn", "Pay is below your $110k minimum."),
               ("warn", "Southern California (Duarte). Not near Sacramento."),
-              ("warn", "CCRA status: recertify before applying.")]),
+              ("warn", "CCRA is expired and recertification is in process; the letter says so.")]),
 
     dict(id="ucdavis-health-crc-zr", group=G_RES, kind="research", track="research", desc=(
             "Search summary. Full posting not captured. Clinical Research Coordinator, Sacramento, "
@@ -387,13 +389,14 @@ ROLES = [
          title="FSP CRA II / Senior CRA I, Oncology (US West)", employer="Thermo Fisher Scientific",
          location="Remote (US West)", pay="$60–109.5k/yr", annual=109500, posted="", source=ZR, relocate=False,
          search_note="Search ZipRecruiter for 'Thermo Fisher FSP CRA Oncology'.",
-         hook="Thermo Fisher's oncology FSP role would let me combine CRA training with the oncology exposure from "
-              "my MD Anderson rotation.",
-         gap="I understand the role expects monitoring experience, and I would welcome the chance to discuss how my CRA "
-             "background and clinical training compare.",
-         fit=[("gap", "Needs monitoring experience. Your resume does not show direct monitoring work; add details of "
-                      "your CRA role if you have them."),
-              ("warn", "CCRA status: recertify before applying."),
+         hook="Thermo Fisher's oncology FSP role would let me combine my breast/oncology CRA experience with the "
+              "oncology exposure from my MD Anderson rotation.",
+         gap="I understand the role expects monitoring experience, and I would welcome the chance to discuss how my "
+             "breast/oncology CRA work at IU Simon (2022–2023) and clinical training compare.",
+         fit=[("warn", "Needs monitoring experience. Your IU Simon CRA role (breast/oncology, 2022–2023) is on the "
+                       "resume now; add what it covered, for example monitoring visits, so employers can see it."),
+              ("ok", "Oncology matches your breast/oncology CRA role and MD Anderson rotation."),
+              ("warn", "CCRA is expired and recertification is in process; the letter says so."),
               ("warn", "Top of the range is below your $110k minimum.")]),
 
     dict(id="c-clinical-sr-cra-cns", group=G_RES, kind="research", track="cra", desc=(
@@ -403,10 +406,10 @@ ROLES = [
          pay="$66–136k/yr", annual=136000, posted="", source=ZR, relocate=False,
          search_note="Search ZipRecruiter for 'C-Clinical Senior CRA CNS'.",
          hook="C-Clinical's CNS trials fit my neuroscience degree and the neurological emergencies I see in the ED.",
-         gap="This is a senior role; I am applying to explore whether my clinical and research background could "
-             "qualify, and I will be candid about the monitoring experience I do not yet have.",
+         gap="This is a senior role. My CRA experience is from 2022 to 2023 at the IU Simon Comprehensive Cancer Center, "
+             "and I would welcome a conversation about how it compares with what you need.",
          fit=[("gap", "Senior-level role. Expect to need years of direct monitoring experience."),
-              ("warn", "CCRA status: recertify before applying.")]),
+              ("warn", "CCRA is expired and recertification is in process; the letter says so.")]),
 
     dict(id="stanford-neuromuscular-crc", group=G_RES, kind="research", track="research", desc=(
             "Search summary. Full posting not captured. Neuromuscular Clinical Research Coordinator Associate, "
@@ -576,10 +579,10 @@ ROLES = [
          pay="$73–150k/yr", annual=150000, posted="", source=PKG, relocate=False,
          search_note="Search ZipRecruiter for 'Actalent Senior CRA II remote'.",
          hook="Actalent's remote CRA role would let me return to clinical research with a clinician's perspective.",
-         gap="This is a senior role, and I do not have direct monitoring experience to offer; I am applying to learn "
-             "whether my clinical and research background could qualify.",
-         fit=[("gap", "Stretch. Senior CRA roles expect direct monitoring experience."),
-              ("warn", "CCRA status: recertify before applying.")]),
+         gap="This is a senior role. My CRA experience is from 2022 to 2023 at the IU Simon Comprehensive Cancer Center, "
+             "and I would welcome a conversation about how it compares with what you need.",
+         fit=[("gap", "Stretch. Senior CRA roles expect several years of CRA experience; you have about one (2022–2023)."),
+              ("warn", "CCRA is expired and recertification is in process; the letter says so.")]),
 
     dict(id="iqvia-sr-cra-sacramento", group=G_RES, kind="research", track="cra", desc=(
             "Search summary. Full posting not captured. Senior CRA, Early Clinical Development, Sacramento, "
@@ -589,8 +592,8 @@ ROLES = [
          url="https://to.indeed.com/aarghymrs27c",
          hook="IQVIA's early clinical development work in Sacramento would pair my clinical training with research "
               "operations.",
-         gap="This is a senior role and I do not have direct monitoring experience; I am applying to explore a path "
-             "in, including a trainee program if one is available.",
+         gap="This is a senior role. My CRA experience is from 2022 to 2023 at the IU Simon Comprehensive Cancer Center, "
+             "and I would welcome a conversation about how it compares, or about a more junior opening.",
          fit=[("gap", "Stretch. IQVIA entry-level CRA roles usually want a trainee program or on-site monitoring."),
               ("warn", "Posted June 30, so it may be filled.")]),
 ]
