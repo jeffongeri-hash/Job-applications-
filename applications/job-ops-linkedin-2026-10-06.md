@@ -5,7 +5,8 @@ Search terms: physician assistant emergency medicine, physician assistant urgent
 physician assistant, clinical research associate.
 
 These are **unscored**. The OpenAI account behind the key has no credit, so job-ops' AI scoring did not run.
-The run imported 134 jobs; the 15 below are the ones whose titles match PA or clinical research.
+The run imported 134 jobs. The tables below are the ones whose titles match PA or clinical research, plus roles
+found by searching the full job descriptions for PA terms (section "Found by description search").
 Confirm each is still open before applying.
 
 ## PA
@@ -32,6 +33,24 @@ Confirm each is still open before applying.
 | [Clinical Research Coordinator-258798](https://www.linkedin.com/jobs/view/4473683203) | Medix™ | Walnut Creek, CA | not listed | 2026-10-05 |
 | [Clinical Research Coordinator (Oncology)](https://www.linkedin.com/jobs/view/4474615858) | SQRL | Walnut Creek, CA | $37–48/hr | 2026-10-05 |
 | [Clinical Research Coordinator](https://www.linkedin.com/jobs/view/4474991982) | Redbock - an NES Fircroft company | Pleasanton, CA | $40–45/hr | 2026-10-06 |
+
+## Found by description search
+
+Titles that a PA/CRA title filter misses. I read each description to confirm a PA can fill the role.
+
+| Role | Employer | Where | Pay | Posted | Why it counts |
+|---|---|---|---|---|---|
+| [Physician Asst II](https://www.linkedin.com/jobs/view/4473898919) | Kaiser Permanente | Roseville, CA | $110–117/hr | 2026-10-04 | Senior PA role; office, hospital, ED or perioperative. Title says "Asst", not "Assistant". |
+| [Advanced Practice Clinician, Care Anywhere](https://www.linkedin.com/jobs/view/4473692857) | Alignment Health | Modesto, CA | $130–195k/yr | 2026-10-06 | Accepts an active NP or PA license. The RN license and furnishing number lines apply to NP only. Home visits required. |
+| [Advanced Practice Provider, Dermatology](https://www.linkedin.com/jobs/view/4476358534) | Pacific Skin Institute | Sacramento, CA | $95–211k/yr | 2026-10-06 | Works alongside PA/NP/MD teams. Wide pay range; confirm. |
+
+### Check the posting
+
+| Role | Employer | Where | Pay | Posted | Why it is uncertain |
+|---|---|---|---|---|---|
+| [Annual Wellness Visit Provider](https://www.linkedin.com/jobs/view/4474104237) | Axis Community Health | Pleasanton, CA | $75–122/hr | 2026-10-05 | "Physician Assistant" appears only in a keyword list; confirm PAs are eligible. |
+
+Left out: the remaining 4 NP-only postings (NP titles with no PA language) and ComplexCare's per-diem NP (the "P.A." in that text is a professional association).
 
 Note: the clinical research roles are coordinator-level (CRC), not CRA. For monitoring roles, see
 [`remote-cra.md`](remote-cra.md) and [`broader-search-2026-10-06.md`](broader-search-2026-10-06.md).
