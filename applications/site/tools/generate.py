@@ -101,6 +101,12 @@ EVIDENCE = {
         "safety and clinical judgment that trials depend on."
     ),
 }
+EVIDENCE["cardio"] = (
+    "In the Emergency Department I manage cardiovascular emergencies, including three STEMIs (with STEMI "
+    "activations), three NSTEMIs, CHF exacerbations (five or more) and aortic aneurysm (two), coordinating with "
+    "cardiology and surgery, alongside 15–25 patients per shift with acute and undifferentiated presentations. I "
+    "also trained in internal medicine (two rotations) and hold ACLS, BLS and ATLS certification."
+)
 EVIDENCE["research"] += " My CCRA credential has expired and recertification is in process."
 EVIDENCE["cra"] = EVIDENCE["research"]
 
@@ -171,13 +177,13 @@ BULLETS = dict(V=F.B_VOLUME, C=F.B_CARDIO, N=F.B_NEURO, P=F.B_PROC, G=F.B_GI, T=
 BULLET_ORDER = {
     "ed": "VCNPGT", "locum": "VCNPGT", "urgent": "VPNCGT", "primary": "VNGCTP", "derm": "VPTNCG",
     "surg": "VPCNGT", "gi": "VGPNCT", "onc": "VCNTPG", "bh": "VGNTCP", "exam": "VTNCGP",
-    "research": "VT", "cra": "VT",
+    "research": "VT", "cra": "VT", "cardio": "VCNTPG",
 }
 ROT_FIRST = {
     "ed": ["em", "surg", "fm", "im"], "urgent": ["em", "fm", "peds", "im", "pc"], "primary": ["fm", "im", "pc", "peds", "wh"],
     "derm": ["derm", "surg", "peds", "fm"], "surg": ["surg", "em", "peds"], "gi": ["im", "surg", "fm"],
     "onc": ["onc", "im", "surg"], "bh": ["bh", "im", "fm", "pc"], "exam": ["im", "fm", "pc", "em"],
-    "locum": ["em", "fm", "im", "pc"], "research": ["onc", "derm", "im"], "cra": ["onc", "derm", "im"],
+    "locum": ["em", "fm", "im", "pc"], "cardio": ["im", "em", "surg"], "research": ["onc", "derm", "im"], "cra": ["onc", "derm", "im"],
 }
 CLINICAL_S1 = "Board-certified Physician Assistant (PA-C) with active clinical experience in a high-volume emergency department."
 SUMMARY = {
@@ -204,6 +210,8 @@ SUMMARY = {
            "presentations in the ED. ACLS/BLS/ATLS certified."),
     "exam": ("Focused physical assessment and accurate documentation of findings, with training in analyzing data and "
              "writing up results. ACLS/BLS/ATLS certified."),
+    "cardio": ("Management of cardiovascular emergencies in the ED (STEMI, NSTEMI, CHF exacerbation, aortic aneurysm) "
+               "with internal medicine training. ACLS/BLS/ATLS certified."),
     "locum": ("12 rotations across 8 specialties during MSPAS training, supporting quick adaptation to new settings. "
               "Independent emergency procedures including laceration repair, I&D, fracture management, and joint "
               "reduction. ACLS/BLS/ATLS certified."),
@@ -362,6 +370,9 @@ def build():
             r["description"] = clean_desc(li["description"])
             r["url"] = li["url"]
             r["posted"] = li["posted"] or r.get("posted", "")
+            r["descKind"] = "full"
+        elif r.get("posting"):
+            r["description"] = clean_desc(r["posting"])
             r["descKind"] = "full"
         else:
             r["description"] = d

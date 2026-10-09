@@ -531,7 +531,8 @@ ROLES = [
          pay="$140–145/hr", annual=None, posted="2026-08-24", source=PKG,
          url="https://to.indeed.com/aafvbzd2bhxr",
          hook="A trauma surgery assignment builds on my ED trauma care and my ATLS certification.",
-         fit=[LIC, ("warn", "Redding is far from Sacramento (about 2.5 hours)."), ("ok", "Trauma surgery is a related field.")]),
+         fit=[LIC, ("warn", "Posted Aug 24, over 30 days ago. It may be filled."),
+              ("warn", "Redding is far from Sacramento (about 2.5 hours)."), ("ok", "Trauma surgery is a related field.")]),
 
     dict(id="aya-locums-pa", group=G_LOCUM, kind="inquiry", track="locum", desc=(
             "Search summary. Full posting not captured. Locum Physician Assistant, United States, up to $115/hr, "
@@ -540,7 +541,8 @@ ROLES = [
          pay="Up to $115/hr", annual=239200, posted="2026-08-28", source=PKG,
          url="https://to.indeed.com/aa7cfzkmr8c6",
          hook="I would like to be matched with locum PA assignments in California once my license is issued.",
-         fit=[LIC, ("info", "General agency posting. Use it to reach a recruiter who can match California assignments.")]),
+         fit=[LIC, ("warn", "Posted Aug 28, over 30 days ago. It may be filled."),
+              ("info", "General agency posting. Use it to reach a recruiter who can match California assignments.")]),
 
     dict(id="medix-np-pa-citrus-heights", group=G_LOCUM, kind="inquiry", track="ed", desc=(
             "Search summary. Full posting not captured. Medix recruiter posting for a Nurse Practitioner or "
@@ -555,8 +557,8 @@ ROLES = [
             "Search summary. Full posting not captured. Jordan Search Consultants recruiter posting for NPs and "
             "PAs across multiple specialties, Greater Sacramento, from $130k/yr, permanent, posted Sept 15."),
          title="NPs and PAs, multiple specialties (recruiter posting)", employer="Jordan Search Consultants",
-         location="Greater Sacramento, CA", pay="From $130k/yr", annual=None, posted="2026-09-15", source=PKG,
-         url="https://to.indeed.com/aavpvl4hg7zj",
+         location="Greater Sacramento, CA", pay="From $130k/yr", annual=None, posted="2026-10-06", source=PKG,
+         url="https://to.indeed.com/aavmlzm8d87y",
          hook="I would like to learn which Greater Sacramento employers you represent for PAs.",
          fit=[LIC, ("info", "Recruiter: worth a short email to see which employers they represent.")]),
 
@@ -596,4 +598,106 @@ ROLES = [
              "and I would welcome a conversation about how it compares, or about a more junior opening.",
          fit=[("gap", "Stretch. IQVIA entry-level CRA roles usually want a trainee program or on-site monitoring."),
               ("warn", "Posted June 30, so it may be filled.")]),
+
+    # ------------------------------------------------------------------ Friday search, Oct 9, 2026
+    dict(id="sehatu-pa-roseville", group=G_EXAM, kind="pa", track="primary", desc="", posting="Sehatu is building the future of sleep care, providing end-to-end support for the full spectrum of sleep problems and overall healthspan.\n\nWe use technology and holistic, personalized tests and treatments backed by science to make the best sleep care accessible to everyone. We're tackling the root causes of sleep problems and improving patients' quality of life.\n\nWe are looking for a high-energy, licensed PA-C to be the face of Sehatu, elevating our brand and creating a premier patient experience.\n\n**WHAT YOU'LL DO**\n* Diagnose and treat the full spectrum of sleep disorders, emphasizing non-pharmaceutical management while establishing, tracking, and maintaining overall health.\n* Communicate with patients via phone, video call, in person, etc. (most of our care is provided virtually).\n* Coordinate patient care with our care team, health coaches and sleep instructors.\n\n**WHO YOU ARE**\n* High-energy and motivated.\n* Familiarity with sleep is a plus, but we will provide education and training.\n* Currently licensed in CA (other states are a plus).\n* Experience with Epic EHR is a plus.\n* Exceptional organizational skills and great follow-through on tasks.\n* Easily builds rapport and establishes relationships with a variety of individuals.\n\n**PAY AND HOURS**\nPay: $70.00 - $91.00 per hour. Expected hours: 24 - 40 per week.\nBenefits: 401(k) with matching, dental, health, life and vision insurance, flexible schedule, paid time off.\n\n**REQUIRED**\n* California medical license\n* DEA certification\n* PA-C\n\nWork location: in person (Roseville, CA).",
+         title="Physician Assistant (sleep care)", employer="Sehatu Inc", location="Roseville, CA",
+         pay="$70–91/hr", annual=189280, posted="2026-10-08", source=IND,
+         url="https://to.indeed.com/aadkx6dlnswf",
+         hook="Sehatu's approach to sleep care, which emphasizes non-pharmaceutical management along with nutrition, "
+              "exercise and stress management, is a model of care I would like to work in.",
+         gap="I do not yet have experience in sleep medicine, and I appreciate that your team provides education and "
+             "training.",
+         fit=[("gap", "Requires a current California PA license and DEA registration. Neither is issued yet (license "
+                      "expected January 2027)."),
+              ("ok", "Posted Oct 8 and local to Roseville. Flexible schedule, 24 to 40 hours a week."),
+              ("warn", "Most care is by phone or video. You have no telehealth experience on your resume."),
+              ("ok", "Sleep experience is not required; training is provided."),
+              ("info", "At 24 hours a week the pay works out to about $87–114k a year.")]),
+
+    dict(id="northbay-cardiac-clinic-pa-fairfield", group=G_SPEC, kind="pa", track="cardio", desc=(
+            "Search summary. Full posting not captured. Physician Assistant, Cardiac Clinic (NBGW), full time, day "
+            "shift, NorthBay Health, Fairfield, $102.7–139.1k/yr, on site. Seen on ZipRecruiter one day before the "
+            "search. I could not find a second copy of this posting, so confirm it on NorthBay's careers page."),
+         title="Physician Assistant, Cardiac Clinic (full time, day)", employer="NorthBay Health",
+         location="Fairfield, CA", pay="$102.7–139.1k/yr", annual=139100, posted="2026-10-08", source=ZR,
+         url="https://www.ziprecruiter.com/job-redirect?match_token=Cp8BChZIMWY2SjY0QVJ3Mk5FUzRmbkhRRndBEiQwMWExMjBiZi1jN2RjLTcxZWYtOTE0OC1lZTk5NzI0N2M5YzIaW0FBR3Q2MjlTLUhvT0R0cmJRdmlycDJ3WDIzaTVSbnNQYlVhSG5NYXpIRVdxX2hOS2psUVlyU1NFYnJFMFA1d196MVM5UHl0LXRZdVR1UXZ5U0Z1VE1RR1RvWG8gya0FEAEYya0F&tsid=100000502",
+         hook="A cardiac clinic position at NorthBay Health connects directly to the cardiovascular emergencies I "
+              "manage in the Emergency Department.",
+         gap="I have not worked in an outpatient cardiology clinic, and I would expect to be trained in it.",
+         fit=[LIC, ("ok", "Cardiology ties to your STEMI, NSTEMI, CHF and aortic aneurysm experience from the ED."),
+              ("warn", "The pay range starts at $102.7k, below your $110k minimum. The top is $139.1k."),
+              ("warn", "Fairfield is about 45 miles from Sacramento."),
+              ("warn", "No outpatient cardiology experience on your resume.")]),
+
+    dict(id="northbay-urgent-care-green-valley-pa", group=G_ED, kind="pa", track="urgent", desc=(
+            "Search summary. Full posting not captured. Physician Assistant, Urgent Care, Green Valley, per diem, "
+            "day shifts, NorthBay Health, Fairfield, $102.7–139.1k/yr annualized, on site. Seen on ZipRecruiter "
+            "about 7 days before the search."),
+         title="Physician Assistant, Urgent Care, Green Valley (per diem, day)", employer="NorthBay Health",
+         location="Fairfield, CA", pay="$102.7–139.1k/yr", annual=139100, posted="2026-10-02", source=ZR,
+         url="https://www.ziprecruiter.com/job-redirect?match_token=Cp8BChZSVGdKcWdXcjhhbDVLdVRsWnh3bjh3EiQwMWExMjBjMC0xYWY2LTczNTktOTk3Zi1kNjQ5YWU5YzBkNDgaW0FBRkt4cktodmt2Z05RZmV5b1lRSWM2cU9XNGJNM1FialkwNWtWbl9LRjVER0dmWGx3WURkQ21XMVllQ3dDTXZ6MEhLUDQ4Zk53OUlQNW5ucHFQdC12cWVuOW8gya0FEAEYya0F&tsid=100000502",
+         hook="Urgent care at NorthBay's Green Valley site suits the pace and breadth of my emergency department "
+              "experience.",
+         fit=[LIC, ("ok", "Urgent care fits your ED experience."),
+              ("warn", "Per diem: shifts are not guaranteed, so annual pay depends on how many you work."),
+              ("warn", "Fairfield is about 45 miles from Sacramento.")]),
+
+    dict(id="nsi-primary-care-app-stockton", group=G_PRIM, kind="pa", track="primary", desc=(
+            "Search summary. Full posting not captured. Nurse Practitioner / Physician Assistant (APP), Primary "
+            "Care, Stockton, $130–180k/yr, full time, on site, from NSI Health Care Services. Listed twice on "
+            "ZipRecruiter (under NSI Health Care Services and NSI Healthcare), 2 to 3 days before the search."),
+         title="Nurse Practitioner / Physician Assistant (APP), Primary Care", employer="NSI Health Care Services",
+         location="Stockton, CA", pay="$130–180k/yr", annual=180000, posted="2026-10-06", source=ZR,
+         url="https://www.ziprecruiter.com/job-redirect?match_token=Cp8BChZzNzhoWk5uZ09qZEQtc2tCNVdnZWVnEiQwMWExMjBiZi1jN2RjLTcxZjItOTAyMi1lMDQyMTNiNzEyNGEaW0FBRW5QSjd1ZVNabkxrelhXbHFjOERkUldvTjBaenRHcTgyRk1XNmg0Q0VnQTNWVmI4c2J4WVh2ZmdEa3F3Rl84aEhlV0lDWF8xTFJOSlJvMGpydkhCVGR0TU0gya0FEAEYya0F&tsid=100000502",
+         hook="A full-time primary care role for NPs and PAs in Stockton fits my family medicine, internal medicine "
+              "and primary care training.",
+         fit=[LIC, ("ok", "Primary care matches your family medicine, internal medicine and primary care rotations."),
+              ("ok", "Pay range is above your minimum."),
+              ("warn", "Stockton is about 50 miles from Sacramento.")]),
+
+    dict(id="fcs-street-medicine-psychiatry-pa", group=G_SPEC, kind="pa", track="bh", desc=(
+            "Search summary. Posting CA174b from FCS, Inc.: a full-time Physician Assistant on a street medicine "
+            "team in Sacramento providing mental health treatment, with psychiatry experience wanted and a "
+            "starting salary of $160k. ZipRecruiter shows it posted today; the copy on DocCafe was last updated "
+            "May 28, 2026, so confirm it is still open."),
+         title="Physician Assistant, Street Medicine (psychiatry), CA174b", employer="FCS, Inc.",
+         location="Sacramento, CA", pay="From $160k/yr", annual=None, posted="2026-10-09", source=ZR + " and DocCafe",
+         url="https://www.ziprecruiter.com/job-redirect?match_token=CpwBChZqcWZ2Q0M2TE1hRzhOeFNoR3drYTNBEiQwMWExMjBiZi1jN2RjLTcxZWEtOWNkYy01MTFkMDQyMzJkYzgaWEFBRzZDbU9lZzFmWl9jY1FDak0wald0R2F0Y19hM1JOY3pwbnlXQmhKMmJQYi1DWlNRMUZQLVJKY0p1YzFLTnl6NXpMUm9JZ2h4S0RMekpubE9FaWlTeUggya0FEAEYya0F&tsid=100000502",
+         hook="FCS's street medicine team brings mental health treatment to people in Sacramento who need it most, "
+              "which is care I would be proud to provide.",
+         gap="My psychiatry experience is limited to my behavioral and mental health rotation, and I would be "
+             "building that experience on the job.",
+         fit=[LIC, ("gap", "Psychiatry experience wanted. You have one behavioral and mental health rotation."),
+              ("warn", "The DocCafe copy was last updated May 28, 2026. ZipRecruiter shows it refreshed today, so "
+                       "confirm it is open."),
+              ("info", "Street medicine means care delivered in the community. Ask about safety, schedule and "
+                       "supervision."),
+              ("ok", "Local to Sacramento, and the pay starts well above your minimum.")]),
+
+    dict(id="innocare-cra-remote", group=G_RES, kind="research", track="cra", desc="", posting="**Overview**\nClinical Research Associate is responsible for assisting with management of the day-to-day clinical trial operations including trial start-up, conduct, and close-out activities in accordance with Good Clinical Practices (GCP).\n\n**Responsibilities**\n* Acts as liaison between Project Managers and research site personnel\n* Monitors the conduct of clinical trials and compliance with established timelines\n* Adheres to protocol regulatory requirements, good clinical practice regulations, and standard operating procedures\n* Ensures compliance with the patient-consent process\n* Verifies the receipt, handling, accounting, storage conditions, and availability of clinical products under investigation\n* Verifies compliance and quality of collected data\n* Ensures compliance with the procedures to apply in the event of serious adverse events\n* Responsibilities primarily involve the management of assigned investigational study sites including pre-study, initiation, monitoring, and study close-out site visits.\n* Generate, revise, circulate and/or track project-specific documentation including the protocol, case report forms, informed consent forms, and regulatory packets.\n* Contribute to the maintenance of the Trial Master File and electronic project organization and documentation system.\n* Maintain contact with study sites, sponsors, and other involved parties.\n* Assist with management and review of site invoices received\n\n**Qualifications and requirements**\n* Bachelor's degree in Life Sciences, Nursing or a related discipline is required\n* Minimum of 2-3 years' experience with clinical site monitoring for CRO/Pharmaceutical/Biotech industries\n* Minimum 2 years' direct experience managing essential documents\n* Knowledge of Good Clinical Practices (GCP), clinical monitoring, study site oversight and management, and regulatory compliance\n* Excellent accuracy and attentiveness to detail; strong written and verbal communication skills\n* Highly organized and capable of working in a team environment under minimal supervision\n* Enjoy the fast pace in a start-up company\n* Willing and able to travel when needed (25% required)\n\nPay: $70,000 - $120,000 per year. Work location: remote.",
+         title="Clinical Research Associate (remote)", employer="InnoCare Pharma", location="Remote",
+         pay="$70–120k/yr", annual=120000, posted="2026-09-28", source=IND, relocate=False,
+         url="https://to.indeed.com/aasxc4dbybtb",
+         hook="InnoCare's CRA role covers trial start-up, monitoring and close-out at a growing company, which is the "
+              "full cycle of work I want to return to.",
+         gap="I understand the posting asks for two to three years of site monitoring experience. My CRA experience is "
+             "from 2022 to 2023 at the IU Simon Comprehensive Cancer Center, and I would welcome a conversation about "
+             "how it compares.",
+         fit=[("gap", "Requires 2 to 3 years of clinical site monitoring and 2 years managing essential documents. "
+                      "Your CRA role at IU Simon was 2022 to 2023, about one year. Add what it covered."),
+              ("warn", "CCRA is expired and recertification is in process; the letter says so."),
+              ("warn", "25% travel is required."),
+              ("ok", "Remote, and the range tops out above your $110k minimum.")]),
+
+    dict(id="objectivehealth-crc2-folsom", group=G_RES, kind="research", track="research", desc=(
+            "Search summary. Full posting not captured. Clinical Research Coordinator II, Folsom, $52–69k/yr, "
+            "full time, on site, from ObjectiveHealth. Seen on ZipRecruiter about 7 days before the search."),
+         title="Clinical Research Coordinator II", employer="ObjectiveHealth", location="Folsom, CA",
+         pay="$52–69k/yr", annual=69000, posted="2026-10-02", source=ZR,
+         url="https://www.ziprecruiter.com/job-redirect?match_token=CpQBChZJckpicnQzTGl1WWQwS1RVR2NSZWh3EiQwMWExMjBiZi1jN2Q2LTc2NGYtYTFlZS1iODAzNjJhNDlmNjMaUEFBRmlKUXBXNnRBMWs1N0hEY3YtOFRRWmV0WERCdEZGS3NSdmlhcjhBelRQRlFRZ05PcTViN1p6NlVxOXE0ZmtpanV0NnNpYkVhbGg1UUxZIMmtBRABGMmtBQ%3D%3D&tsid=100000502",
+         hook="ObjectiveHealth's coordinator role in Folsom is in the greater Sacramento area and fits my research "
+              "training.",
+         fit=[("warn", "Pay is below your $110k minimum."),
+              ("ok", "In the greater Sacramento area, and your IU Simon CRA role is directly relevant.")]),
 ]
