@@ -132,12 +132,13 @@ def letter(r):
             "A short summary of my background: MSPAS from Des Moines University (August 2025); I see 15–25 patients "
             "per shift in a high-volume emergency department; I perform sutures, incision and drainage, "
             "fracture management and joint reductions independently; and I hold ACLS, BLS and ATLS certification.",
-            F.LICENSE_LINE + (" " + F.RELOCATE_LINE if relocate else ""),
-            "Could you tell me what the next steps would be, and whether a start after January 2027 would work? My "
-            "resume is attached.",
+            ((r["license_line"] if "license_line" in r else F.LICENSE_LINE) + (" " + F.RELOCATE_LINE if relocate else "")).strip(),
+            r.get("ask", "Could you tell me what the next steps would be, and whether a start after January 2027 "
+                         "would work? My resume is attached."),
         ]
         if r.get("gap"):
             paras.insert(2, r["gap"])
+        paras = [p for p in paras if p]
         signoff = [f"Thank you,", F.FULL_NAME, f"{F.PHONE} · {F.EMAIL}"]
     else:
         subject = f"Application: {title} – {org}"

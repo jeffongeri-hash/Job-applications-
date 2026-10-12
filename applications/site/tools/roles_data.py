@@ -700,4 +700,104 @@ ROLES = [
               "training.",
          fit=[("warn", "Pay is below your $110k minimum."),
               ("ok", "In the greater Sacramento area, and your IU Simon CRA role is directly relevant.")]),
+
+    # ------------------------------------------------------------------ Locum EM search, Oct 12, 2026
+    # Letters for roles outside California do not state a license, because facts.py does not list licensed states.
+    dict(id="weatherby-locum-pa-em-iowa", group=G_LOCUM, kind="inquiry", track="locum", relocate=False, desc=(
+            "Search summary. Full posting not captured. Weatherby Healthcare, Locum Physician Assistant, Emergency "
+            "Medicine, Iowa, $75–121/hr, posted Oct 2, 2026. Weatherby describes its ranges as all-inclusive "
+            "estimates: hourly base plus possible overtime, call and holiday pay."),
+         title="Locum Physician Assistant, Emergency Medicine (Iowa)", employer="Weatherby Healthcare",
+         location="Iowa", pay="$75–121/hr", annual=None, posted="2026-10-02", source=IND,
+         url="https://to.indeed.com/aagk7yl676j7",
+         hook="I am looking for emergency medicine locum assignments in Iowa, where I currently practice.",
+         license_line="",
+         ask="Could you tell me about the facilities, shift patterns and pay for current Iowa emergency medicine "
+             "assignments, and what credentialing involves? My resume is attached.",
+         fit=[("ok", "Emergency medicine locum in the state where you work now."),
+              ("info", "$75–121/hr is an all-inclusive estimate. $100 is near the top of the usual range for a PA."),
+              ("warn", "Confirm your Iowa license is active and which facilities need extra credentialing."),
+              ("warn", "Many locum EM assignments ask for 1 to 2 years of emergency experience and full "
+                       "credentialing. You have about one year.")]),
+
+    dict(id="weatherby-locum-pa-em-illinois", group=G_LOCUM, kind="inquiry", track="locum", relocate=False, desc=(
+            "Search summary. Full posting not captured. Weatherby Healthcare, Locum Physician Assistant, Emergency "
+            "Medicine, Illinois, $75–121/hr, posted Sept 30, 2026. Weatherby lists Normal and Moline, IL "
+            "assignments with APP shifts of 8am to 8pm and 5pm to 5am, seven days a week."),
+         title="Locum Physician Assistant, Emergency Medicine (Illinois)", employer="Weatherby Healthcare",
+         location="Illinois (Normal, Moline)", pay="$75–121/hr", annual=None, posted="2026-09-30", source=IND,
+         url="https://to.indeed.com/aa6wntzkf22c",
+         hook="I am interested in emergency medicine locum assignments in Illinois, where I completed two of my "
+              "clinical rotations.",
+         license_line="",
+         ask="Could you tell me about current Illinois emergency medicine assignments, the licensure and "
+             "credentialing timeline, and the pay range? My resume is attached.",
+         fit=[("warn", "Your resume lists no Illinois PA license. Confirm what you hold and how long a new license "
+                       "would take."),
+              ("info", "$75–121/hr is an all-inclusive estimate. $100 is near the top of the usual range."),
+              ("ok", "Emergency medicine, in a state where you trained (primary care rotation, Palos Heights)."),
+              ("warn", "Many locum EM assignments ask for 1 to 2 years of emergency experience. You have about one.")]),
+
+    dict(id="weatherby-locum-pa-em-indiana", group=G_LOCUM, kind="inquiry", track="locum", relocate=False, desc=(
+            "Search summary from the web, undated. Weatherby Healthcare, Locum PA, Emergency Medicine, Marion, "
+            "Indiana, $75–95/hr, a 13-week assignment with day and night shifts. A separate Weatherby Indiana PRN "
+            "posting lists $75–121/hr with 5 to 10 shifts a month."),
+         title="Locum PA, Emergency Medicine (Marion, Indiana)", employer="Weatherby Healthcare",
+         location="Marion, IN", pay="$75–95/hr", annual=None, posted="", source="Weatherby careers page (via web search)",
+         url="https://weatherbyhealthcare.com/job/job-3167689",
+         hook="I am interested in emergency medicine locum assignments in Indiana, where I studied for my "
+              "bachelor's degree.",
+         license_line="",
+         ask="Could you tell me whether this Marion assignment is still open, the licensure and credentialing "
+             "timeline for Indiana, and whether the PRN option is available? My resume is attached.",
+         fit=[("warn", "The posting has no date. Confirm it is still open."),
+              ("gap", "Pay tops out at $95/hr on the 13-week assignment, under your $100 target. The PRN posting "
+                      "reaches $121."),
+              ("warn", "Your resume lists no Indiana PA license."),
+              ('warn', 'Many locum EM assignments ask for 1 to 2 years of emergency experience and full credentialing. You have about one year.')]),
+
+    dict(id="vista-locum-pa-em-rockford", group=G_LOCUM, kind="inquiry", track="locum", relocate=False, desc=(
+            "Search summary from the web, undated. Vista Staffing, Locum Tenens Physician Assistant, Emergency "
+            "Medicine, Rockford, Illinois, $95–100/hr, a 13-week assignment, credentialing about 60 days."),
+         title="Locum Tenens PA, Emergency Medicine (Rockford, IL)", employer="Vista Staffing", location="Rockford, IL",
+         pay="$95–100/hr", annual=None, posted="",
+         source="My PA Network (via web search)",
+         url="https://www.mypanetwork.com/physician-assistant-jobs/120481-locum-tenens-physician-assistant-emergency-medicine-95-100-per-hour",
+         hook="A 13-week emergency medicine assignment in Rockford is the kind of locum work I am looking for.",
+         license_line="",
+         ask="Could you tell me whether this assignment is still open, the experience requirement, and the "
+             "licensure and credentialing steps? My resume is attached.",
+         fit=[("ok", "$95–100/hr reaches your $100 target at the top of the range."),
+              ("warn", "The listing has no date. Confirm it is still open."),
+              ("warn", "Credentialing takes about 60 days, and your resume lists no Illinois PA license."),
+              ('warn', 'Many locum EM assignments ask for 1 to 2 years of emergency experience and full credentialing. You have about one year.')]),
+
+    dict(id="prime-staffing-locum-np-em-marion", group=G_LOCUM, kind="inquiry", track="locum", relocate=False, desc=(
+            "Search summary. Full posting not captured. Locum Tenens Nurse Practitioner, Emergency Medicine, "
+            "Marion, Indiana, $112/hr, contractor, on site, from Prime Staffing. Seen on ZipRecruiter 4 days "
+            "before the search. The title is for a Nurse Practitioner."),
+         title="Locum Tenens NP, Emergency Medicine ($112/hr)", employer="Prime Staffing", location="Marion, IN",
+         pay="$112/hr", annual=None, posted="2026-10-08", source=ZR,
+         url="https://www.ziprecruiter.com/job-redirect?match_token=Cp8BChZvMUM5UEtmZVhMUVdTSElhVC1oZDhREiQwMWExMmU1OC0wOWEwLTdjMWYtYjc3Ni0xNjQ4NjkxNzAzOGYaW0FBRy1kVXBzZU5oUk80ZGtvUEYwU2FPTmJQT2tMSlNVTHhpYmliRzBJQXM5bEFKQXIycDRCMTRuSkNXb3VQZkJVcFlJVEJHLWkxTGtLbFc0dW5Wa0ZYbTRxOWsgya0FEAEYya0F&tsid=100000502",
+         hook="I am interested in your emergency medicine locum assignment in Marion and would like to ask whether "
+              "physician assistants are considered.",
+         license_line="",
+         ask="Could you tell me whether PAs are eligible for this role, the Indiana licensure and credentialing "
+             "steps, and the shift schedule? My resume is attached.",
+         fit=[("gap", "Listed for Nurse Practitioners. Ask whether PAs are considered before spending time on it."),
+              ("ok", "$112/hr is above your $100 target."),
+              ("warn", "Your resume lists no Indiana PA license."),
+              ('warn', 'Many locum EM assignments ask for 1 to 2 years of emergency experience and full credentialing. You have about one year.')]),
+
+    dict(id="weatherby-locum-pa-em-california-la", group=G_LOCUM, kind="inquiry", track="locum", desc=(
+            "Search summary from the web, undated. Locum Tenens Physician Assistant, Emergency Medicine, Los "
+            "Angeles area, California, $75–110/hr, from Weatherby Healthcare via a job aggregator."),
+         title="Locum Tenens PA, Emergency Medicine (Los Angeles area)", employer="Weatherby Healthcare",
+         location="Los Angeles area, CA", pay="$75–110/hr", annual=None, posted="",
+         source="Job aggregator (via web search)", url="https://talents.vaia.com/?p=1188415",
+         hook="I am looking for emergency medicine locum assignments in California once my license is issued.",
+         fit=[LIC, ("warn", "The listing has no date. Confirm it is still open."),
+              ("warn", "Los Angeles is about 6 hours from Sacramento. Travel and housing may be covered; ask."),
+              ("info", "$110/hr is the top of the range, above your $100 target."),
+              ('warn', 'Many locum EM assignments ask for 1 to 2 years of emergency experience and full credentialing. You have about one year.')]),
 ]
