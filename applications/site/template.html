@@ -174,7 +174,7 @@ h1.role-title { font-size: 26px; line-height: 1.2; letter-spacing: -0.015em; mar
       <li><b>CRA role.</b> Added to every resume: Clinical Research Associate, breast/oncology, IU Simon Comprehensive Cancer Center, 2022 to 2023. I only have the title and years, so the entry has no bullets. Add 2 to 3 duties (for example monitoring visits, regulatory binders, or sites covered) and regenerate.</li>
       <li><b>CCRA.</b> Shown as "earned 2023; expired, recertification in process" on resumes. Research letters say the same.</li>
       <li><b>Move.</b> Letters say you are planning to move to Sacramento or the greater Sacramento area. Bay Area, Modesto and Stockton roles show the distance in their fit check.</li>
-      <li><b>License.</b> Letters state that your California PA license application is in process, expected January 2027.</li>
+      <li><b>License.</b> Letters and resumes state that you are licensed in Iowa and Indiana, with Illinois (no date given) and California (expected January 2027) in process. License numbers are not included.</li>
       <li><b>Drafts only.</b> Read each posting, then apply yourself.</li>
     </ul>
   </details>
@@ -304,7 +304,7 @@ function renderList() {
       h("span", { class: "emp", text: r.employer }),
       h("span", { class: "ttl", text: r.title }),
       h("span", { class: "sub" }, h("span", { text: r.location }), h("span", { text: r.pay }),
-        r.rank === 1 ? h("span", { class: "tag-top", text: "Top lead" }) : null,
+        r.rank <= 1 ? h("span", { class: "tag-top", text: "Top lead" }) : null,
         r.rank >= 9 ? h("span", { class: "tag-low", text: "Lowest priority" }) : null)));
   }
 }

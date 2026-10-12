@@ -66,7 +66,9 @@ CERTS = [
     "Basic Life Support (BLS) – 2023 to present",
     "Advanced Trauma Life Support (ATLS) – October 2025 to October 2029",
     "Certified Clinical Research Associate (CCRA) – earned 2023; expired, recertification in process",
+    "Physician Assistant license – Iowa; Indiana",
     "California PA license – application in progress, expected January 2027",
+    "Illinois PA license – application in progress",
 ]
 
 # Rotations: (key, text). Order in the resume is the original order.
@@ -117,8 +119,14 @@ VOLUNTEER = "Boys Reaching for Opportunities in Science (BROS) – Volunteer, 20
 
 # --- statements about licensure and location used in letters ---
 LICENSE_LINE = (
-    "My California PA license application is in process, with an expected issue date of January 2027."
+    "I am licensed as a PA in Iowa and Indiana, and my California license application is in process, with an "
+    "expected issue date of January 2027."
 )
+# Licensure, stated by the applicant: licensed in Iowa and Indiana; California and Illinois applications in process.
+LIC_IA_IN = "I am licensed as a PA in Iowa and Indiana."
+LIC_IL = "I am licensed as a PA in Iowa and Indiana, and my Illinois license application is in process."
+LIC_ALL = ("I am licensed as a PA in Iowa and Indiana, and my Illinois and California license applications are in "
+           "process.")
 RELOCATE_LINE = "I am planning to move to Sacramento or the greater Sacramento area."
 
 # Prior CRA role, stated by the applicant. No duties were given, so the resume entry has no bullets.

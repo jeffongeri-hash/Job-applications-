@@ -46,7 +46,7 @@ Letters and resumes are assembled only from those two files, so a fact you fix t
   `tools/facts.py` (`CRA_JOB`) and rebuild.
 - **CCRA:** shown as "earned 2023; expired, recertification in process".
 - **Move:** letters say you are planning to move to Sacramento or the greater Sacramento area.
-- **License:** letters say the California PA license application is in process, expected January 2027.
+- **License:** letters and resumes say you are licensed in Iowa and Indiana, with Illinois and California in process (California expected January 2027). No license numbers are included.
 
 Postings change quickly. Confirm each is still open.
 
