@@ -130,18 +130,18 @@ LIC_ALL = ("I am licensed as a PA in Iowa and Indiana, and my Illinois and Calif
            "process.")
 RELOCATE_LINE = "I am planning to move to Sacramento or the greater Sacramento area."
 
-# Prior CRA role and duties, stated by the applicant. The wording stays close to what they said; "OB oncology" is
-# theirs. Do not add duties that were not stated (for example monitoring visits).
+# Prior CRA role and duties, stated by the applicant. The wording stays close to what they said ("gyn oncology"
+# is written out as gynecologic oncology). Do not add duties that were not stated (for example monitoring visits).
 CRA_JOB = {
     "title": "Clinical Research Associate – Breast/Oncology",
     "dates": "2022 – 2023",
     "org": "IU Simon Comprehensive Cancer Center",
 }
 CRA_BULLETS = [
-    "Managed breast and OB oncology clinical trials.",
+    "Managed breast and gynecologic oncology clinical trials.",
     "Kept study sponsors updated on trial progress.",
     "Updated study records and confirmed record keeping.",
 ]
 CRA_SENTENCE = ("From 2022 to 2023 I worked as a Clinical Research Associate at the IU Simon Comprehensive Cancer "
-                "Center, managing breast and OB oncology clinical trials, keeping sponsors updated, and updating and "
+                "Center, managing breast and gynecologic oncology clinical trials, keeping sponsors updated, and updating and "
                 "confirming study records")

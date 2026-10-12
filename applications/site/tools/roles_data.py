@@ -393,7 +393,7 @@ ROLES = [
               "oncology exposure from my MD Anderson rotation.",
          gap="I understand the role expects monitoring experience, and I would welcome the chance to discuss how my "
              "breast/oncology CRA work at IU Simon (2022–2023) and clinical training compare.",
-         fit=[("warn", "Needs monitoring experience. Your IU Simon CRA role (2022–2023) now lists managing breast and OB "
+         fit=[("warn", "Needs monitoring experience. Your IU Simon CRA role (2022–2023) now lists managing breast and gynecologic "
                        "oncology trials, sponsor updates and record keeping, but not site monitoring visits."),
               ("ok", "Oncology matches your breast/oncology CRA role and MD Anderson rotation."),
               ("warn", "CCRA is expired and recertification is in process; the letter says so."),
