@@ -387,6 +387,7 @@ def build():
         write_resume_docx(R, DOCS / f"{r['id']}-resume.docx")
         out.append(dict(
             id=r["id"], group=r["group"], kind=r["kind"], track=r["track"], title=r["title"], employer=r["employer"],
+            rank=r.get("rank", 9 if "Weatherby" in r["employer"] else 5),
             location=r["location"], pay=r["pay"], posted=r.get("posted", ""), deadline=r.get("deadline", ""),
             url=r.get("url"), searchNote=r.get("search_note", ""), source=r["source"],
             description=r["description"], descKind=r["descKind"], fit=fit, letter=L, resume=R,

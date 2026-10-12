@@ -756,9 +756,11 @@ ROLES = [
               ("warn", "Your resume lists no Indiana PA license."),
               ('warn', 'Many locum EM assignments ask for 1 to 2 years of emergency experience and full credentialing. You have about one year.')]),
 
-    dict(id="vista-locum-pa-em-rockford", group=G_LOCUM, kind="inquiry", track="locum", relocate=False, desc=(
+    dict(id="vista-locum-pa-em-rockford", group=G_LOCUM, kind="inquiry", track="locum", relocate=False, rank=1, desc=(
             "Search summary from the web, undated. Vista Staffing, Locum Tenens Physician Assistant, Emergency "
-            "Medicine, Rockford, Illinois, $95–100/hr, a 13-week assignment, credentialing about 60 days."),
+            "Medicine, Rockford, Illinois, $95–100/hr, a 13-week assignment with flexible scheduling and 8-hour "
+            "shifts, credentialing about 60 days. Requires Illinois licensure plus BLS, ACLS and PALS. The page "
+            "could not be opened from the container, so this comes from a search summary."),
          title="Locum Tenens PA, Emergency Medicine (Rockford, IL)", employer="Vista Staffing", location="Rockford, IL",
          pay="$95–100/hr", annual=None, posted="",
          source="My PA Network (via web search)",
@@ -770,9 +772,11 @@ ROLES = [
          fit=[("ok", "$95–100/hr reaches your $100 target at the top of the range."),
               ("warn", "The listing has no date. Confirm it is still open."),
               ("warn", "Credentialing takes about 60 days, and your resume lists no Illinois PA license."),
+              ("gap", "Requires BLS, ACLS and PALS. Your resume lists ACLS, BLS and ATLS but not PALS."),
+              ("info", "8-hour shifts with flexible scheduling."),
               ('warn', 'Many locum EM assignments ask for 1 to 2 years of emergency experience and full credentialing. You have about one year.')]),
 
-    dict(id="prime-staffing-locum-np-em-marion", group=G_LOCUM, kind="inquiry", track="locum", relocate=False, desc=(
+    dict(id="prime-staffing-locum-np-em-marion", group=G_LOCUM, kind="inquiry", track="locum", relocate=False, rank=3, desc=(
             "Search summary. Full posting not captured. Locum Tenens Nurse Practitioner, Emergency Medicine, "
             "Marion, Indiana, $112/hr, contractor, on site, from Prime Staffing. Seen on ZipRecruiter 4 days "
             "before the search. The title is for a Nurse Practitioner."),
@@ -799,5 +803,117 @@ ROLES = [
          fit=[LIC, ("warn", "The listing has no date. Confirm it is still open."),
               ("warn", "Los Angeles is about 6 hours from Sacramento. Travel and housing may be covered; ask."),
               ("info", "$110/hr is the top of the range, above your $100 target."),
+              ('warn', 'Many locum EM assignments ask for 1 to 2 years of emergency experience and full credentialing. You have about one year.')]),
+
+    # ------------------------------------------------------------------ Locum agencies beyond Weatherby, Oct 12, 2026
+    # Staffing agency sites are blocked from the container network, so these come from search summaries only.
+    dict(id="vista-locum-pa-em-galesburg", group=G_LOCUM, kind="inquiry", track="locum", relocate=False, rank=1, desc=(
+            "Search summary from the web, undated. Vista Staffing, Locum Tenens Physician Assistant, Emergency "
+            "Medicine, Galesburg, Illinois, $105/hr, a 13-week assignment focused on weekends. Requires an active, "
+            "unrestricted Illinois PA license and emergency or acute care experience. This page could not be opened from the container, so the details come from a search summary. Confirm them with the agency."),
+         title="Locum Tenens PA, Emergency Medicine (Galesburg, IL, weekends)", employer="Vista Staffing",
+         location="Galesburg, IL", pay="$105/hr", annual=None, posted="", source="My PA Network (via web search)",
+         url="https://www.mypanetwork.com/physician-assistant-jobs/123031-locum-tenens-physician-assistant-emergency-medicine-105-per-hour",
+         hook="A weekend-focused, 13-week emergency medicine assignment in Galesburg is the kind of locum work I am "
+              "looking for.",
+         license_line="",
+         ask="Could you tell me whether this assignment is still open, how much emergency experience is required, "
+             "and the Illinois licensure and credentialing steps? My resume is attached.",
+         fit=[("ok", "$105/hr is above your $100 target. One of the few postings that is."),
+              ("gap", "Requires an active, unrestricted Illinois PA license and emergency or acute care experience. "
+                      "Your resume lists no Illinois license, and you have about one year of EM."),
+              ("warn", "Weekend-focused. Confirm the start date and credentialing time (Vista's Rockford listing "
+                       "says about 60 days)."),
+              ("warn", "The listing has no date. Confirm it is still open.")]),
+
+    dict(id="barton-locum-pa-em-midwest", group=G_LOCUM, kind="inquiry", track="locum", relocate=False, rank=2, desc=(
+            "Search summary. Barton Associates places PAs in Iowa, Indiana and Illinois. I found no current "
+            "emergency medicine PA listing in those states, only physician emergency roles and an Indiana urgent "
+            "care PA assignment (78 days from Dec 4, 2026). Barton says it handles licensing at no cost for PAs "
+            "who already hold a license in another state. This page could not be opened from the container, so the details come from a search summary. Confirm them with the agency."),
+         title="Locum PA, Emergency Medicine (Iowa, Indiana, Illinois)", employer="Barton Associates",
+         location="Iowa, Indiana, Illinois", pay="Not listed", annual=None, posted="", source="Barton Associates (via web search)",
+         url="https://www.bartonassociates.com/physician-assistant-pa-jobs-in-illinois/",
+         hook="Barton's offer to handle licensing for PAs who are licensed in another state would let me take "
+              "emergency medicine assignments across the Midwest.",
+         license_line="",
+         ask="Could you tell me which emergency medicine PA assignments are open or coming up in Iowa, Indiana and "
+             "Illinois, and how your licensing help works? My resume is attached.",
+         fit=[("ok", "Barton says it handles licensing at no cost for PAs licensed in another state. That could "
+                     "close your Indiana and Illinois license gap."),
+              ("warn", "No current EM PA listing found in these three states. This is an inquiry, not an application."),
+              ("info", "Barton's California EM PA assignments are listed separately (Barton, California).")]),
+
+    dict(id="comphealth-locum-pa-em-iowa", group=G_LOCUM, kind="inquiry", track="locum", relocate=False, rank=2, desc=(
+            "Search summary, undated. CompHealth, Physician Assistant, Emergency Medicine, Iowa, per diem, with "
+            "shifts of 6am to 6pm, 6pm to 6am or noon to midnight. Requires ATLS, PALS, ACLS and BLS. Pay not "
+            "shown. This page could not be opened from the container, so the details come from a search summary. Confirm them with the agency."),
+         title="Locum PA, Emergency Medicine (Iowa, per diem)", employer="CompHealth", location="Iowa",
+         pay="Not listed", annual=None, posted="", source="CompHealth (via web search)",
+         url="https://locumtenens.comphealth.com/job/job-3255998",
+         hook="CompHealth's per diem emergency shifts in Iowa would let me work flexibly around my current "
+              "schedule.",
+         license_line="",
+         ask="Could you tell me whether this per diem role is still open, the pay, and the credentialing steps? My "
+             "resume is attached.",
+         fit=[("ok", "Per diem with flexible shifts, in the state where you work now."),
+              ('gap', 'Requires PALS. Your resume lists ACLS, BLS and ATLS but not PALS.'),
+              ("warn", "Pay is not shown. CompHealth PA EM postings elsewhere list $75–121/hr as an all-inclusive "
+                       "estimate."),
+              ("warn", "The listing has no date. Confirm it is still open."),
+              ('warn', 'Many locum EM assignments ask for 1 to 2 years of emergency experience and full credentialing. You have about one year.')]),
+
+    dict(id="comphealth-locum-pa-em-oroville", group=G_LOCUM, kind="inquiry", track="locum", rank=2, desc=(
+            "Search summary, undated. CompHealth, locum PA, Emergency Medicine, Oroville, California, per diem, "
+            "as needed, 7pm to 7am shifts in a hospital, with 15 to 25 patients per 12-hour shift. Pay not shown. "
+            "The link goes to CompHealth's PA emergency medicine list, not the individual posting. This page could not be opened from the container, so the details come from a search summary. Confirm them with the agency."),
+         title="Locum PA, Emergency Medicine (Oroville, CA, per diem nights)", employer="CompHealth",
+         location="Oroville, CA", pay="Not listed", annual=None, posted="", source="CompHealth (via web search)",
+         url="https://comphealth.com/jobs/physician-assistant/physician-assistant-emergency-medicine",
+         hook="An emergency department shift with 15 to 25 patients over 12 hours matches the volume I see now.",
+         fit=[LIC, ("ok", "15 to 25 patients per 12-hour shift matches your current ED volume."),
+              ("warn", "Night shifts (7pm to 7am). Oroville is about 70 miles north of Sacramento."),
+              ("warn", "Pay is not shown, and the listing has no date. Confirm both."),
+              ('warn', 'Many locum EM assignments ask for 1 to 2 years of emergency experience and full credentialing. You have about one year.')]),
+
+    dict(id="jackson-coker-locum-pa-em-iowa", group=G_LOCUM, kind="inquiry", track="locum", relocate=False, rank=2, desc=(
+            "Search summary. Jackson and Coker, Emergency Medicine PA, Iowa locum: 12-hour shifts, days, nights or "
+            "swings, about 37,000 ED visits a year. The posting I found covered April to May 2026, which has "
+            "passed, so treat this as an inquiry about similar fall and winter assignments. This page could not be opened from the container, so the details come from a search summary. Confirm them with the agency."),
+         title="Locum PA, Emergency Medicine (Iowa)", employer="Jackson and Coker", location="Iowa",
+         pay="Not listed", annual=None, posted="", source="Jackson and Coker (via web search)",
+         url="https://jobs.jacksoncoker.com/emergency-medicine-pa-jobs/iowa/job-112912",
+         hook="Jackson and Coker's Iowa emergency department assignments, with 12-hour day, night or swing shifts, "
+              "are the kind of locum work I am looking for.",
+         license_line="",
+         ask="Could you tell me about Iowa emergency medicine PA assignments open this fall and winter, the pay, and "
+             "what credentialing involves? My resume is attached.",
+         fit=[("gap", "The posting I found covered April to May 2026 and has passed. Ask about current assignments."),
+              ("info", "12-hour shifts; days, nights or swings. About 37,000 ED visits a year at that site."),
+              ("warn", "Confirm your Iowa license is active and which facilities need extra credentialing."),
+              ('warn', 'Many locum EM assignments ask for 1 to 2 years of emergency experience and full credentialing. You have about one year.')]),
+
+    dict(id="docs-who-care-pa-np-em", group=G_LOCUM, kind="inquiry", track="locum", relocate=False, rank=2, desc=(
+            "Search summary. Docs Who Care, PA/NP for emergency medicine, clinic or hospitalist opportunities at "
+            "rural hospitals, with full-time, part-time, contract and locum tenens options: ED-only shifts, mixed ED "
+            "and inpatient, clinic plus ED, and urgent care days. Pay reported at $80 to $115/hr depending on "
+            "location, volumes and scope. The listing I found is for Kansas, not one of your four states. "
+            "This page could not be opened from the container, so the details come from a search summary. Confirm them with the agency."),
+         title="PA/NP, Emergency Medicine, rural hospitals (locum and contract)", employer="Docs Who Care",
+         location="Kansas listed; ask about Iowa, Indiana, Illinois, California", pay="$80–115/hr (reported)",
+         annual=None, posted="", source="My PA Network (via web search)",
+         url="https://www.mypanetwork.com/physician-assistant-jobs/145637-pa-np-for-emergency-medicine-clinic-or-hospitalist-opportunities",
+         hook="Docs Who Care's rural hospital emergency and urgent care shifts, with flexibility and independent "
+              "practice, fit the locum emergency work I am looking for.",
+         license_line="",
+         ask="Could you tell me whether you place PAs for emergency medicine locum or contract work in Iowa, "
+             "Indiana, Illinois or California, and the pay and credentialing steps? My resume is attached.",
+         fit=[("gap", "The posting I found is for Kansas, not Iowa, Indiana, Illinois or California. Ask whether they "
+                      "place PAs in your states."),
+              ("info", "Reported $80–115/hr, with the top end near your $100 target."),
+              ("info", "Mixes ED-only, inpatient, clinic and urgent care shifts. Ask for ED-only if that is what you "
+                       "want."),
+              ("warn", "Independent practice at rural hospitals is a lot for about one year of experience. Ask about "
+                       "supervision and backup."),
               ('warn', 'Many locum EM assignments ask for 1 to 2 years of emergency experience and full credentialing. You have about one year.')]),
 ]

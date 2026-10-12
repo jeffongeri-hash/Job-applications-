@@ -88,6 +88,7 @@ details.confirm b { color: var(--ink); font-weight: 500; }
   margin-top: 3px; }
 .role .flags { float: right; font-family: var(--mono); font-size: 11.5px; display: flex; gap: 6px; margin-left: 8px; }
 .flag-gap { color: var(--gap); } .flag-warn { color: var(--warn); }
+.tag-top { color: var(--ok); } .tag-low { color: var(--muted); font-style: italic; }
 .role.done .emp, .role.skip .emp { text-decoration: line-through; text-decoration-color: var(--muted); }
 .role.skip { opacity: 0.55; }
 .empty { padding: 20px 14px; color: var(--muted); }
@@ -274,7 +275,7 @@ function visible() {
   const q = state.q.trim().toLowerCase();
   let rs = roles.filter((r) => (state.group === "All" || r.group === state.group) &&
     (!q || (r.employer + " " + r.title + " " + r.location + " " + r.group).toLowerCase().includes(q)));
-  if (state.sort === "group") rs = rs.slice().sort((x, y) => GROUP_ORDER.indexOf(x.group) - GROUP_ORDER.indexOf(y.group));
+  if (state.sort === "group") rs = rs.slice().sort((x, y) => GROUP_ORDER.indexOf(x.group) - GROUP_ORDER.indexOf(y.group) || x.rank - y.rank);
   if (state.sort === "fit") rs = rs.slice().sort((a, b) => count(a, "gap") - count(b, "gap") || count(a, "warn") - count(b, "warn"));
   if (state.sort === "new") rs = rs.slice().sort((a, b) => (b.posted || "").localeCompare(a.posted || ""));
   return rs;
@@ -302,7 +303,9 @@ function renderList() {
         w ? h("span", { class: "flag-warn", title: "Things to check", text: "!" + w }) : null),
       h("span", { class: "emp", text: r.employer }),
       h("span", { class: "ttl", text: r.title }),
-      h("span", { class: "sub" }, h("span", { text: r.location }), h("span", { text: r.pay }))));
+      h("span", { class: "sub" }, h("span", { text: r.location }), h("span", { text: r.pay }),
+        r.rank === 1 ? h("span", { class: "tag-top", text: "Top lead" }) : null,
+        r.rank >= 9 ? h("span", { class: "tag-low", text: "Lowest priority" }) : null)));
   }
 }
 
@@ -393,7 +396,7 @@ function renderDetail() {
 
   box.append(
     h("button", { class: "back", type: "button", onclick: () => { location.hash = ""; } }, "← All roles"),
-    h("div", { class: "kicker", text: r.group + "  ·  " + r.source }),
+    h("div", { class: "kicker", text: r.group + "  ·  " + r.source + (r.rank >= 9 ? "  ·  lowest-priority agency" : "") }),
     h("h1", { class: "role-title", text: r.title }),
     h("div", { class: "meta" },
       h("span", {}, h("b", { text: r.employer })), h("span", { text: r.location }), h("span", { text: r.pay }),
