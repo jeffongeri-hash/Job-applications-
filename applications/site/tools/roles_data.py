@@ -393,8 +393,8 @@ ROLES = [
               "oncology exposure from my MD Anderson rotation.",
          gap="I understand the role expects monitoring experience, and I would welcome the chance to discuss how my "
              "breast/oncology CRA work at IU Simon (2022–2023) and clinical training compare.",
-         fit=[("warn", "Needs monitoring experience. Your IU Simon CRA role (breast/oncology, 2022–2023) is on the "
-                       "resume now; add what it covered, for example monitoring visits, so employers can see it."),
+         fit=[("warn", "Needs monitoring experience. Your IU Simon CRA role (2022–2023) now lists managing breast and OB "
+                       "oncology trials, sponsor updates and record keeping, but not site monitoring visits."),
               ("ok", "Oncology matches your breast/oncology CRA role and MD Anderson rotation."),
               ("warn", "CCRA is expired and recertification is in process; the letter says so."),
               ("warn", "Top of the range is below your $110k minimum.")]),
@@ -685,7 +685,8 @@ ROLES = [
              "from 2022 to 2023 at the IU Simon Comprehensive Cancer Center, and I would welcome a conversation about "
              "how it compares.",
          fit=[("gap", "Requires 2 to 3 years of clinical site monitoring and 2 years managing essential documents. "
-                      "Your CRA role at IU Simon was 2022 to 2023, about one year. Add what it covered."),
+                      "Your CRA role at IU Simon was about one year (2022 to 2023). It covers record keeping and "
+                      "sponsor updates, but your resume does not show site monitoring visits."),
               ("warn", "CCRA is expired and recertification is in process; the letter says so."),
               ("warn", "25% travel is required."),
               ("ok", "Remote, and the range tops out above your $110k minimum.")]),

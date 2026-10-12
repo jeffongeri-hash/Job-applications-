@@ -93,7 +93,7 @@ EVIDENCE = {
         "patients per shift, and I hold ACLS, BLS, ATLS and PALS certification."
     ),
     "research": (
-        F.CRA_SENTENCE + ", and I earned the CCRA credential in 2023. I "
+        F.CRA_SENTENCE + ". I earned the CCRA credential in 2023 and "
         "also completed four research assistant internships, including pharmacogenomics research in sickle cell "
         "anemia, MEG/EEG neuroscience research, and neuroimaging, and I am a co-author on two peer-reviewed "
         "publications (Pharmacogenomics, 2022; Mathematical Thinking and Learning, 2020). As a PA-C assessing "
@@ -258,6 +258,7 @@ def resume(r):
         for x in F.CERTS: li(x)
         sec("PROFESSIONAL EXPERIENCE")
         entry(F.CRA_JOB["title"], F.CRA_JOB["dates"], F.CRA_JOB["org"])
+        for x in F.CRA_BULLETS: li(x)
         entry(F.JOB["title"], F.JOB["dates"], F.JOB["org"] + "  |  " + F.JOB["where"])
         for x in bullets: li(x)
         sec("EDUCATION")
@@ -268,6 +269,7 @@ def resume(r):
         entry(F.JOB["title"], F.JOB["dates"], F.JOB["org"] + "  |  " + F.JOB["where"])
         for x in bullets: li(x)
         entry(F.CRA_JOB["title"], F.CRA_JOB["dates"], F.CRA_JOB["org"])
+        for x in F.CRA_BULLETS: li(x)
         sec("EDUCATION")
         for t, d, o, w in F.EDUCATION: entry(t, d, o + "  |  " + w)
         sec("CERTIFICATIONS & LICENSURE")

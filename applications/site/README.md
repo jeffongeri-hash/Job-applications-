@@ -41,9 +41,9 @@ Letters and resumes are assembled only from those two files, so a fact you fix t
 
 ## Confirm before sending
 
-- **CRA role:** every resume now lists Clinical Research Associate, breast/oncology, IU Simon Comprehensive Cancer
-  Center, 2022 to 2023. Only the title and years are known, so the entry has no bullets. Add 2 to 3 duties in
-  `tools/facts.py` (`CRA_JOB`) and rebuild.
+- **CRA role:** every resume lists Clinical Research Associate, IU Simon Comprehensive Cancer Center, 2022 to 2023,
+  with three bullets from your description (`CRA_BULLETS` in `tools/facts.py`). "OB oncology" is as you wrote it. No
+  monitoring visits are claimed; add them there if they apply and rebuild.
 - **CCRA:** shown as "earned 2023; expired, recertification in process".
 - **Move:** letters say you are planning to move to Sacramento or the greater Sacramento area.
 - **License:** letters and resumes say you are licensed in Iowa and Indiana, with Illinois and California in process (California expected January 2027). No license numbers are included.
