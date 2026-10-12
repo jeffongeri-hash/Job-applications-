@@ -65,6 +65,7 @@ CERTS = [
     "Advanced Cardiac Life Support (ACLS) – 2023 to present",
     "Basic Life Support (BLS) – 2023 to present",
     "Advanced Trauma Life Support (ATLS) – October 2025 to October 2029",
+    "Pediatric Advanced Life Support (PALS)",
     "Certified Clinical Research Associate (CCRA) – earned 2023; expired, recertification in process",
     "Physician Assistant license – Iowa; Indiana",
     "California PA license – application in progress, expected January 2027",

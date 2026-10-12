@@ -445,7 +445,7 @@ ROLES = [
               "is the kind of department where I want to grow.",
          fit=[LIC, ("ok", "Strong specialty match. STEMI and stroke center fits your ED work."),
               ("warn", "A bigger, higher-volume ED than your current one. Lead with what you have done."),
-              ("info", "Ask whether PALS is required for the pediatric ED.")]),
+              ("ok", "PALS is useful for the pediatric ED, and you hold it.")]),
 
     dict(id="sutter-sacramento-ed", group=G_ED, kind="pa", track="ed", desc=(
             "Search summary. Full posting not captured. Physician Assistant, Emergency Medicine, Sutter Medical "
@@ -770,7 +770,7 @@ ROLES = [
          fit=[("ok", "$95–100/hr reaches your $100 target at the top of the range."),
               ("warn", "The listing has no date. Confirm it is still open."),
               ("gap", "Needs an Illinois PA license, which is in process. Credentialing takes about 60 days and cannot finish until it is issued."),
-              ("gap", "Requires BLS, ACLS and PALS. Your resume lists ACLS, BLS and ATLS but not PALS."),
+              ("ok", "Requires BLS, ACLS and PALS, which you hold."),
               ("info", "8-hour shifts with flexible scheduling."),
               ('warn', 'Many locum EM assignments ask for 1 to 2 years of emergency experience and full credentialing. You have about one year.')]),
 
@@ -852,7 +852,7 @@ ROLES = [
          ask="Could you tell me whether this per diem role is still open, the pay, and the credentialing steps? My "
              "resume is attached.",
          fit=[("ok", "Per diem with flexible shifts, in the state where you work now."),
-              ('gap', 'Requires PALS. Your resume lists ACLS, BLS and ATLS but not PALS.'),
+              ('ok', 'Requires ATLS, PALS, ACLS and BLS. You hold all four.'),
               ("info", "Pay is not shown on this posting. A Vinton, Iowa CompHealth ED listing shows $75–110/hr, 12-hour shifts."),
               ("warn", "The listing has no date. Confirm it is still open."),
               ('warn', 'Many locum EM assignments ask for 1 to 2 years of emergency experience and full credentialing. You have about one year.')]),

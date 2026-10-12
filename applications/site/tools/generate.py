@@ -30,7 +30,7 @@ ED_STATS = (
     "In the Emergency Department I independently evaluate and manage 15–25 patients per shift with acute, "
     "undifferentiated and life-threatening presentations, including three STEMIs (with STEMI activations), three "
     "NSTEMIs, CHF exacerbations, stroke alerts, seizures and aortic aneurysm. I order and interpret labs and "
-    "imaging, work alongside attending physicians, nurses, pharmacists and consultants, and hold ACLS, BLS and ATLS "
+    "imaging, work alongside attending physicians, nurses, pharmacists and consultants, and hold ACLS, BLS, ATLS and PALS "
     "certification."
 )
 PROCEDURES = (
@@ -45,7 +45,7 @@ EVIDENCE = {
         "undifferentiated complaints, and I perform procedures independently, including sutures (ten or more), "
         "incision and drainage (six), cast placement (three) and joint reductions. My family medicine, internal "
         "medicine and pediatrics rotations give me a wide base for the range of patients urgent care sees. I hold "
-        "ACLS, BLS and ATLS certification."
+        "ACLS, BLS, ATLS and PALS certification."
     ),
     "primary": (
         "I trained in family medicine (Adel and Ankeny, Iowa), internal medicine (two rotations), primary care "
@@ -90,7 +90,7 @@ EVIDENCE = {
     "locum": (
         "I completed 12 rotations across 8 specialties during my MSPAS training, which prepared me to step into "
         "new settings quickly. In my current Emergency Department role I independently evaluate and manage 15–25 "
-        "patients per shift, and I hold ACLS, BLS and ATLS certification."
+        "patients per shift, and I hold ACLS, BLS, ATLS and PALS certification."
     ),
     "research": (
         F.CRA_SENTENCE + ", and I earned the CCRA credential in 2023. I "
@@ -105,7 +105,7 @@ EVIDENCE["cardio"] = (
     "In the Emergency Department I manage cardiovascular emergencies, including three STEMIs (with STEMI "
     "activations), three NSTEMIs, CHF exacerbations (five or more) and aortic aneurysm (two), coordinating with "
     "cardiology and surgery, alongside 15–25 patients per shift with acute and undifferentiated presentations. I "
-    "also trained in internal medicine (two rotations) and hold ACLS, BLS and ATLS certification."
+    "also trained in internal medicine (two rotations) and hold ACLS, BLS, ATLS and PALS certification."
 )
 EVIDENCE["research"] += " My CCRA credential has expired and recertification is in process."
 EVIDENCE["cra"] = EVIDENCE["research"]
@@ -131,7 +131,7 @@ def letter(r):
             f"\"{title}\" listing at {org}. {r['hook']}",
             "A short summary of my background: MSPAS from Des Moines University (August 2025); I see 15–25 patients "
             "per shift in a high-volume emergency department; I perform sutures, incision and drainage, "
-            "fracture management and joint reductions independently; and I hold ACLS, BLS and ATLS certification.",
+            "fracture management and joint reductions independently; and I hold ACLS, BLS, ATLS and PALS certification.",
             ((r["license_line"] if "license_line" in r else F.LICENSE_LINE) + (" " + F.RELOCATE_LINE if relocate else "")).strip(),
             r.get("ask", "Could you tell me what the next steps would be, and whether a start after January 2027 "
                          "would work? My resume is attached."),
@@ -191,31 +191,31 @@ SUMMARY = {
     "ed": ("Proven ability to independently evaluate and manage acute, critical, and undifferentiated presentations "
            "across emergency medicine, cardiology, neurology, trauma, orthopedics, and primary care. Proficient in "
            "emergency procedures including laceration repair, I&D, fracture management, and joint reduction. "
-           "ACLS/BLS/ATLS certified."),
+           "ACLS/BLS/ATLS/PALS certified."),
     "urgent": ("Proven ability to independently evaluate and manage acute and undifferentiated presentations, with "
                "procedural skills including laceration repair, I&D, fracture management, and joint reduction. "
-               "Training across family medicine, internal medicine, pediatrics, and primary care. ACLS/BLS/ATLS certified."),
+               "Training across family medicine, internal medicine, pediatrics, and primary care. ACLS/BLS/ATLS/PALS certified."),
     "primary": ("Broad outpatient training across family medicine, internal medicine, primary care, pediatrics, and "
                 "women's health, with ED management of chronic disease exacerbations including CHF and COPD. "
-                "ACLS/BLS/ATLS certified."),
+                "ACLS/BLS/ATLS/PALS certified."),
     "derm": ("Dermatology rotation (West Des Moines, IA) and independent procedural skills including laceration "
-             "repair and I&D. Training across family medicine, pediatrics, and surgery. ACLS/BLS/ATLS certified."),
+             "repair and I&D. Training across family medicine, pediatrics, and surgery. ACLS/BLS/ATLS/PALS certified."),
     "surg": ("Surgery rotation (Minneapolis, MN) and independent emergency procedures including laceration repair, "
-             "I&D, epistaxis management, fracture management, and joint reduction. ATLS, ACLS and BLS certified."),
+             "I&D, epistaxis management, fracture management, and joint reduction. ATLS, ACLS, BLS and PALS certified."),
     "gi": ("Independent management of GI and GU presentations in the ED, with internal medicine and surgery training "
-           "and emergency procedural skills. ACLS/BLS/ATLS certified."),
+           "and emergency procedural skills. ACLS/BLS/ATLS/PALS certified."),
     "onc": ("Hematology/oncology rotation at MD Anderson (Houston, TX) and prior breast/oncology Clinical Research "
             "Associate at the IU Simon Comprehensive Cancer Center (2022–2023). Published clinical researcher with "
-            "expertise in pharmacogenomics and neuroscience. ACLS/BLS/ATLS certified."),
+            "expertise in pharmacogenomics and neuroscience. ACLS/BLS/ATLS/PALS certified."),
     "bh": ("Behavioral and mental health rotation, with independent evaluation of acute and undifferentiated "
-           "presentations in the ED. ACLS/BLS/ATLS certified."),
+           "presentations in the ED. ACLS/BLS/ATLS/PALS certified."),
     "exam": ("Focused physical assessment and accurate documentation of findings, with training in analyzing data and "
-             "writing up results. ACLS/BLS/ATLS certified."),
+             "writing up results. ACLS/BLS/ATLS/PALS certified."),
     "cardio": ("Management of cardiovascular emergencies in the ED (STEMI, NSTEMI, CHF exacerbation, aortic aneurysm) "
-               "with internal medicine training. ACLS/BLS/ATLS certified."),
+               "with internal medicine training. ACLS/BLS/ATLS/PALS certified."),
     "locum": ("12 rotations across 8 specialties during MSPAS training, supporting quick adaptation to new settings. "
               "Independent emergency procedures including laceration repair, I&D, fracture management, and joint "
-              "reduction. ACLS/BLS/ATLS certified."),
+              "reduction. ACLS/BLS/ATLS/PALS certified."),
 }
 RESEARCH_S1 = ("Physician Assistant (PA-C) with a clinical research background: breast/oncology Clinical Research "
                "Associate at the IU Simon Comprehensive Cancer Center (2022–2023), CCRA earned 2023 (recertification in "
