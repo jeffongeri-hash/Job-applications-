@@ -107,6 +107,12 @@ EVIDENCE["cardio"] = (
     "cardiology and surgery, alongside 15–25 patients per shift with acute and undifferentiated presentations. I "
     "also trained in internal medicine (two rotations) and hold ACLS, BLS, ATLS and PALS certification."
 )
+EVIDENCE["wh"] = (
+    "I completed a women's health rotation in Nevada, Iowa, and in the Emergency Department I manage first trimester "
+    "bleeding (two) and evaluate assault victims (two) among 15–25 patients per shift with acute and undifferentiated "
+    "presentations. I also trained in family medicine and primary care, and I hold ACLS, BLS, ATLS and PALS "
+    "certification."
+)
 EVIDENCE["research"] += " My CCRA credential has expired and recertification is in process."
 EVIDENCE["cra"] = EVIDENCE["research"]
 
@@ -178,13 +184,13 @@ BULLETS = dict(V=F.B_VOLUME, C=F.B_CARDIO, N=F.B_NEURO, P=F.B_PROC, G=F.B_GI, T=
 BULLET_ORDER = {
     "ed": "VCNPGT", "locum": "VCNPGT", "urgent": "VPNCGT", "primary": "VNGCTP", "derm": "VPTNCG",
     "surg": "VPCNGT", "gi": "VGPNCT", "onc": "VCNTPG", "bh": "VGNTCP", "exam": "VTNCGP",
-    "research": "VT", "cra": "VT", "cardio": "VCNTPG",
+    "research": "VT", "cra": "VT", "cardio": "VCNTPG", "wh": "VGPNCT",
 }
 ROT_FIRST = {
     "ed": ["em", "surg", "fm", "im"], "urgent": ["em", "fm", "peds", "im", "pc"], "primary": ["fm", "im", "pc", "peds", "wh"],
     "derm": ["derm", "surg", "peds", "fm"], "surg": ["surg", "em", "peds"], "gi": ["im", "surg", "fm"],
     "onc": ["onc", "im", "surg"], "bh": ["bh", "im", "fm", "pc"], "exam": ["im", "fm", "pc", "em"],
-    "locum": ["em", "fm", "im", "pc"], "cardio": ["im", "em", "surg"], "research": ["onc", "derm", "im"], "cra": ["onc", "derm", "im"],
+    "locum": ["em", "fm", "im", "pc"], "cardio": ["im", "em", "surg"], "wh": ["wh", "fm", "pc", "im", "peds"], "research": ["onc", "derm", "im"], "cra": ["onc", "derm", "im"],
 }
 CLINICAL_S1 = "Board-certified Physician Assistant (PA-C) with active clinical experience in a high-volume emergency department."
 SUMMARY = {
@@ -211,6 +217,8 @@ SUMMARY = {
            "presentations in the ED. ACLS/BLS/ATLS/PALS certified."),
     "exam": ("Focused physical assessment and accurate documentation of findings, with training in analyzing data and "
              "writing up results. ACLS/BLS/ATLS/PALS certified."),
+    "wh": ("Women's health rotation (Nevada, IA) and ED management of first trimester bleeding and evaluation of assault "
+           "victims, with family medicine and primary care training. ACLS/BLS/ATLS/PALS certified."),
     "cardio": ("Management of cardiovascular emergencies in the ED (STEMI, NSTEMI, CHF exacerbation, aortic aneurysm) "
                "with internal medicine training. ACLS/BLS/ATLS/PALS certified."),
     "locum": ("12 rotations across 8 specialties during MSPAS training, supporting quick adaptation to new settings. "
@@ -308,6 +316,26 @@ def _font(doc, name="Calibri", size=11):
     st.paragraph_format.space_after = Pt(6)
 
 
+def slim_docx(path):
+    """Drop the legacy stylesWithEffects part and the thumbnail python-docx's template carries (about 40% of each file)."""
+    import zipfile, shutil, tempfile, os
+    drop = {"word/stylesWithEffects.xml", "docProps/thumbnail.jpeg"}
+    tmp = tempfile.mktemp(suffix=".docx")
+    with zipfile.ZipFile(path) as zin, zipfile.ZipFile(tmp, "w", zipfile.ZIP_DEFLATED, compresslevel=9) as zout:
+        for item in zin.infolist():
+            if item.filename in drop:
+                continue
+            data = zin.read(item.filename)
+            if item.filename == "[Content_Types].xml":
+                data = re.sub(rb'<Override[^>]*stylesWithEffects[^>]*/>', b"", data)
+            elif item.filename == "word/_rels/document.xml.rels":
+                data = re.sub(rb'<Relationship [^>]*stylesWithEffects[^>]*/>', b"", data)
+            elif item.filename == "_rels/.rels":
+                data = re.sub(rb'<Relationship [^>]*thumbnail[^>]*/>', b"", data)
+            zout.writestr(item, data)
+    shutil.move(tmp, path)
+
+
 def write_letter_docx(r, L, path):
     doc = Document()
     for s in doc.sections:
@@ -324,6 +352,7 @@ def write_letter_docx(r, L, path):
         pp.paragraph_format.space_after = Pt(0 if i < len(L["signoff"]) - 1 else 6)
         if i == 1: pp.runs[0].bold = True
     doc.save(path)
+    slim_docx(path)
 
 
 def write_resume_docx(R, path):
@@ -350,6 +379,7 @@ def write_resume_docx(R, path):
             if b.get("sub"):
                 q = doc.add_paragraph(b["sub"]); q.paragraph_format.space_after = Pt(2)
     doc.save(path)
+    slim_docx(path)
 
 
 # ----------------------------------------------------------------------------- build

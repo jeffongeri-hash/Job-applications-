@@ -29,6 +29,16 @@ ZR = "ZipRecruiter (via connector search)"
 LI = "LinkedIn (job-ops run, full posting text)"
 PKG = "Earlier application package"
 
+def zr(token):
+    """ZipRecruiter redirect link from the connector's match token."""
+    return "https://www.ziprecruiter.com/job-redirect?match_token=" + token + "&tsid=100000502"
+
+KAISER_TEXT = 'Job Summary (shortened from the posting)\nUnder the direction of a supervising physician, the Physician Assistant provides high quality, efficient, team based patient focused care. Responsibilities may include managing patients in the office, hospital, ED and/or perioperative setting. May be required to first assist in the OR or perform other department specific procedures, and may facilitate on-call responsibilities for the supervising physician. Daily responsibilities vary with department and supervising physician needs and may require evening or weekend hours.\n\nEssential Responsibilities\n* Examines patients, performs comprehensive physical examinations, and compiles patient medical data.\n* Administers or orders diagnostic tests, such as imaging studies, electrocardiogram, and laboratory tests, and interprets results.\n* Performs therapeutic procedures such as injections, immunizations, suturing and wound care, and managing infection.\n* Develops and implements patient management plans, records progress notes, and assists in continuity of care.\n* Instructs and counsels patients on therapeutic regimens, growth and development, family planning, and health maintenance.\n* Depending on specialty: facilitates admissions, transfers and discharges, first assists in surgeries, rounds on inpatients.\n\nBasic Qualifications\n* Experience: N/A\n* Education: graduate from an ARC-PA accredited physician assistant program by start date.\n* Physician Assistant License (California) required at hire.\n* Basic Life Support.\n* National Provider Identifier required at hire.\n* Physician Assistant National Certificate required at hire.\n* Fluoroscopy permit required only for Orthopedics, Interventional Radiology and Radiation Oncology.\n\nSchedule\nPart-time, 32 hours a week, day shift, Monday, Wednesday, Thursday and Friday (off Tuesday), 8:30 AM to 5:00 PM. Travel: yes, 20% of the time. Primary location: Sacramento Point West Medical Offices. Union: UNAC-UHCP Physician Assistants.'
+CBH_TEXT = 'Primary Care Physician Assistant (Community Behavioral Health, Woodland, CA)\nFull-time, in person. Pay: $150,000 to $200,000 per year. Benefits: dental, health and vision insurance.\n\nJob Summary\nWe are seeking a dynamic and compassionate Primary Care Physician Assistant to provide comprehensive primary care services, focusing on health promotion, disease prevention, and management of acute and chronic conditions, collaborating with physicians, nurses and other professionals in a fast-paced environment.\n\nDuties (as listed)\n* Conduct physical examinations and patient assessments, including vital signs and medical history intake.\n* Develop and implement treatment plans, including prescribing medications in accordance with DEA regulations and clinical guidelines.\n* Perform clinical procedures such as suturing, injection administration (including botulinum toxin treatments), phlebotomy, and aseptic techniques.\n* Manage acute pain cases, triage urgent needs, and coordinate care for patients with complex conditions across outpatient clinics, hospitals, or telehealth.\n* Interpret diagnostic tests including radiology reports and laboratory results.\n* Collaborate on discharge planning, hospice and palliative medicine, and post-acute care.\n* Maintain medical records in EMR/EHR systems such as Epic or eClinicalWorks while ensuring HIPAA compliance.\n* Participate in clinical research or clinical trials.\n* Assist in hospital settings with ICU or Level I/II trauma center experience, including ventilator management, airway management, and critical care procedures.\n* Engage in health coaching and client communication.\n\nExperience (as listed)\n* Proven experience in primary care with a foundation in internal medicine or family practice.\n* Prior hospital experience including inpatient care, emergency room exposure, or critical care (ICU or Level I/II trauma center preferred).\n* Proficiency with EMR systems such as Epic or Cerner; telehealth experience is a plus.\n* Hands-on skills in suturing, injections, phlebotomy, and diagnostic test interpretation.\n* Knowledge of CPT and ICD coding.\n* Ability to work within collaborative practice agreements.\nPrimary care: 1 year (preferred).'
+HALO_TEXT = 'Physician Assistant, Medical & Surgical Dermatology (Halo Skin Institute, Folsom, CA)\nFull-time, 4-day workweek. Compensation: $150,000 to $500,000 per year, based on productivity. In person.\n\nHalo Skin Institute is seeking a motivated Physician Assistant with dermatology experience to join a growing practice. The position is designed for a PA who wants more than a traditional employed dermatology role, with a strong teaching environment, substantial earning potential, and opportunities to take on increasing clinical and leadership responsibility.\n\nWhat We Offer\n* 4-day workweek\n* $150,000 to $500,000 annual earning potential, based on productivity\n* Health insurance, 401(k) with employer match, paid malpractice coverage, paid time off and holidays, professional licensing fees covered\n* Strong clinical teaching and mentorship; increasing autonomy as experience and competency develop\n\nThe Position\n* Evaluate, diagnose and treat common and complex dermatologic conditions\n* Perform complete and focused skin examinations\n* Diagnose and manage acne, eczema, psoriasis, rosacea, rashes, skin cancers and other conditions\n* Perform shave and punch biopsies, cryotherapy, electrodessication and curettage\n* Perform surgical excisions as training and experience allow\n* Review pathology and laboratory results and coordinate follow-up\n\nQualifications\n* Graduate of an accredited Physician Assistant program\n* Current or eligible California Physician Assistant license\n* NCCPA certification\n* Minimum 6 months of dermatology experience\n* Strong interest in medical and surgical dermatology; excellent clinical judgment and communication skills'
+NOTOPEN_TEXT = 'This page could not be opened from the container, so the details come from a search summary. Confirm them with the agency.'
+COMMON = ('warn', 'Many locum EM assignments ask for 1 to 2 years of emergency experience and full credentialing. You have about one year.')
+
 ROLES = [
     # ------------------------------------------------------------------ LinkedIn, full postings
     dict(id="sutter-peds-ent", group=G_SPEC, kind="pa", track="surg", desc="LI:0",
@@ -949,4 +959,256 @@ ROLES = [
                        "eligible."),
               ("warn", "Solo ED coverage and recent ER experience are required. You have about one year."),
               ("warn", "Shifts are to be confirmed, and the listing has no date.")]),
+
+    # ------------------------------------------------------------------ Friday search, Oct 16, 2026
+    dict(id="kaiser-pa1-ob-gyn-sacramento", group=G_SPEC, kind="pa", track="wh", desc="", posting=KAISER_TEXT,
+         title="Physician Assistant I, OB/GYN (32 hours, part-time)", employer="Kaiser Permanente",
+         location="Sacramento, CA (Point West)", pay="$99.92–103.93/hr", annual=172936, posted="2026-10-14", source=IND,
+         url="https://to.indeed.com/aa6nljn9sdnt",
+         hook="Kaiser's Physician Assistant I role in Sacramento OB/GYN, a team-based outpatient women's health practice "
+              "that requires no prior experience, is a good place to start in a specialty I want to learn.",
+         gap="I have not practiced in OB/GYN beyond my women's health rotation and the first trimester bleeding I manage in the "
+             "ED, and I would expect to be trained in the specialty.",
+         fit=[("gap", "California PA license is required at hire. Yours is expected January 2027, so ask whether the role "
+                      "can wait or whether they will hire after it is issued."),
+              ("ok", "No experience required: graduate of an ARC-PA program by the start date. This is the entry level, "
+                     "unlike the PA II posting that needs 3 years."),
+              ("ok", "Requires NCCPA certificate, BLS and an NPI at hire. You have all three."),
+              ("ok", "32 hours, Mon, Wed, Thu, Fri, 8:30 to 5, day shift. At 32 hours the pay is about $166–173k a year."),
+              ("warn", "Women's health is a change from emergency medicine. You have a women's health rotation and 2 "
+                       "first trimester bleeding cases in the ED."),
+              ("info", "Travel 20% of the time. Also posted for Roseville OB/GYN at the same pay.")]),
+
+    dict(id="kaiser-pa1-ob-gyn-roseville", group=G_SPEC, kind="pa", track="wh", desc=(
+            "Search summary. Kaiser Permanente, Physician Assistant I, Roseville OB/GYN, 32 hours, part-time, "
+            "$99.92–103.93/hr, posted Oct 14, 2026. It is the sister posting to the Sacramento OB/GYN role "
+            "(same title, hours and pay), so the Sacramento posting text is the best guide. Confirm the Roseville "
+            "posting matches."),
+         title="Physician Assistant I, OB/GYN, Roseville (32 hours, part-time)", employer="Kaiser Permanente",
+         location="Roseville, CA", pay="$99.92–103.93/hr", annual=172936, posted="2026-10-14", source=IND,
+         url="https://to.indeed.com/aaxnslnwqrzl",
+         hook="Kaiser's Physician Assistant I role in Roseville OB/GYN, a team-based outpatient women's health practice, "
+              "is a good place to start in a specialty I want to learn.",
+         gap="I have not practiced in OB/GYN beyond my women's health rotation and the first trimester bleeding I manage in the "
+             "ED, and I would expect to be trained in the specialty.",
+         fit=[("gap", "California PA license is required at hire on the Sacramento posting, and this one is likely the "
+                      "same. Yours is expected January 2027."),
+              ("ok", "The Sacramento posting needs no experience. Confirm the Roseville one matches."),
+              ("ok", "At 32 hours the pay is about $166–173k a year."),
+              ("info", "Roseville is closer to the Folsom and Placer County side of the Sacramento area.")]),
+
+    dict(id="community-behavioral-primary-care-woodland", group=G_PRIM, kind="pa", track="primary", desc="",
+         posting=CBH_TEXT, title="Primary Care Physician Assistant", employer="Community Behavioral Health",
+         location="Woodland, CA", pay="$150–200k/yr", annual=200000, posted="2026-10-07", source=IND,
+         url="https://to.indeed.com/aazdbntkv4xw",
+         hook="A fast-paced primary care role that values emergency room exposure fits my family medicine, internal "
+              "medicine and ED experience.",
+         fit=[LIC, ("ok", "Primary care experience is preferred (1 year), not required. You have family medicine, "
+                          "internal medicine and primary care rotations, and ED experience the posting values."),
+              ("ok", "Pay is well above your minimum."),
+              ("warn", "The duty list is long and generic (botulinum toxin, ventilator and dialysis, research, telehealth). "
+                       "Ask what the day to day looks like."),
+              ("info", "Woodland is about 20 miles from Sacramento. Same employer as the behavioral health PA-C role.")]),
+
+    dict(id="halo-skin-derm-folsom", group=G_SPEC, kind="pa", track="derm", desc="", posting=HALO_TEXT,
+         title="Physician Assistant, Medical & Surgical Dermatology", employer="Halo Skin Institute",
+         location="Folsom, CA", pay="$150–500k/yr (productivity)", annual=500000, posted="2026-09-18", source=IND,
+         url="https://to.indeed.com/aasylb9hnxwv",
+         hook="Halo's teaching environment and 4-day workweek in Folsom, with mentorship for a PA building dermatology "
+              "skills, is the setting I would like to learn in.",
+         gap="The posting asks for six months of dermatology experience. My dermatology exposure so far is my rotation in "
+             "West Des Moines, and I would be building the rest with your mentorship.",
+         fit=[("ok", "Accepts a current or eligible California license, so a pending license may be fine."),
+              ("gap", "Minimum 6 months of dermatology experience. You have a dermatology rotation, not employment."),
+              ("warn", "$150–500k is productivity based. Ask what a new dermatology PA typically earns."),
+              ("ok", "4-day workweek, teaching environment and mentorship."),
+              ("info", "Posted Sept 18, so it will be over 30 days old next week.")]),
+
+    dict(id="northbay-ortho-trauma-pa", group=G_SPEC, kind="pa", track="surg", desc=(
+            "Search summary. Full posting not captured. NorthBay Health, Physician Assistant, Ortho Trauma (HBOX), "
+            "full time, day shift, $106.6–144.5k/yr, on site. ZipRecruiter lists the location as Sacramento, but "
+            "NorthBay's hospitals are in Solano County, so confirm where the role is. Posted about one day before "
+            "this search."),
+         title="Physician Assistant, Ortho Trauma (full time, day)", employer="NorthBay Health",
+         location="Solano County, CA (listed as Sacramento)", pay="$106.6–144.5k/yr", annual=144500,
+         posted="2026-10-15", source=ZR,
+         url=zr("Cp8BChZncl8yakpxMEJpcFNxNzRFblZVV2tREiQwMWExNDRjZC0wZmJhLTdiZDItYmIwZi1kYzViM2E0NmY4NDYaW0FBR1dlQW14Ql9YMU9KV1FlZjBveldOTFVwQVZyYWF4cThJcWxpdjloNURhS0FjVDZoNkxqa3o5WWtGcG1iVWxjaDdSX292U3BEcm9xcm1ZZzdTcGJsMnAxMWMgya0FEAEYya0F"),
+         hook="An orthopedic trauma PA role at NorthBay builds on the fracture management, reductions and casting I do "
+              "in the ED.",
+         gap="I have not worked on an orthopedic trauma service, and I would expect to be trained in it.",
+         fit=[LIC, ("ok", "Ortho trauma matches your ED fracture work: open fracture management (2), casts (3), joint "
+                          "reductions, and ATLS."),
+              ("warn", "The pay range starts at $106.6k, below your $110k minimum. The top is $144.5k."),
+              ("warn", "ZipRecruiter lists Sacramento, but NorthBay is in Solano County (Fairfield, Vacaville). Confirm the site."),
+              ("warn", "No orthopedic surgery or clinic experience on your resume.")]),
+
+    dict(id="northbay-vacaville-primary-care-np-pa", group=G_PRIM, kind="pa", track="primary", desc=(
+            "Search summary. Full posting not captured. NorthBay Health, Nurse Practitioner/Physician Assistant, "
+            "Vacaville Primary Care, full time, days, $116.2–150.4k/yr, on site. ZipRecruiter lists the location as "
+            "Sacramento. Posted the day of this search."),
+         title="NP/PA, Vacaville Primary Care (full time, days)", employer="NorthBay Health",
+         location="Vacaville, CA (listed as Sacramento)", pay="$116.2–150.4k/yr", annual=150400,
+         posted="2026-10-16", source=ZR,
+         url=zr("Cp8BChY5b2sxX29BQlVEYUc4Mk8tWlhQV0FnEiQwMWExNDRjZC0wZjVmLTc1NmEtOGQ3ZS1hNmNmZGZhZjYzOTgaW0FBSDFPbllqajN5NHRRc0lPQUhub1F2ZF9Jcndkam1ZZTVvMTV6bi1xckdHR1AwZ21rNS1nbUNHSVFreWtZQnNKRWdQQ3lYcy1nZlBWWXJUVEl2UVlvd3pQR1Egya0FEAEYya0F"),
+         hook="A full-time primary care role at NorthBay's Vacaville clinic fits my family medicine, internal medicine "
+              "and primary care training.",
+         fit=[LIC, ("ok", "Primary care matches your family medicine, internal medicine and primary care rotations."),
+              ("ok", "Pay is above your minimum."),
+              ("warn", "Vacaville is about 35 miles from Sacramento.")]),
+
+    dict(id="urgent-care-partners-brentwood-app", group=G_ED, kind="pa", track="urgent", desc=(
+            "Search summary. Full posting not captured. Urgent Care Partners Inc, Advanced Practice Provider "
+            "(Physician Assistant or NP), Brentwood, California, full time, on site, $150–180k/yr, with medical, "
+            "dental, vision, paid time off and retirement benefits. Posted about two days before this search."),
+         title="Advanced Practice Provider (PA or NP), Urgent Care", employer="Urgent Care Partners Inc",
+         location="Brentwood, CA", pay="$150–180k/yr", annual=180000, posted="2026-10-14", source=ZR,
+         url=zr("CpQBChZjLUZxclVkODNvcl9qcFNacDc3UlNnEiQwMWExNDRjZC0wZWUzLTc3YzItOGQ0ZS03ZDU1NGY5Y2FiNWQaUEFBRTJaYWxGU3BNd2xiUjFvUHNyTGxQLXRLNkJVYmhWcWtQYmNvMWc2cktjN0dOS19makdEVnFBLW5pTkZ3M1hIRTY5R1JzYU9IZ2JkVjYzIMmtBRABGMmtBQ%3D%3D"),
+         hook="An urgent care role for PAs and NPs suits the pace and breadth of my emergency department experience.",
+         fit=[LIC, ("ok", "Urgent care fits your ED experience, and the pay is well above your minimum."),
+              ("warn", "Brentwood is in eastern Contra Costa County, about 65 miles from Sacramento.")]),
+
+    dict(id="ucdavis-hospital-medicine-pa", group=G_SPEC, kind="pa", track="ed", desc=(
+            "Search summary. Full posting not captured. UC Davis Health, Hospital Medicine Physician Assistant "
+            "(Physician Assistant), Sacramento, full time, on site, $177.3–233.9k/yr, with medical, dental, vision, "
+            "paid time off, life insurance and retirement. Posted about four days before this search."),
+         title="Hospital Medicine Physician Assistant", employer="UC Davis Health", location="Sacramento, CA",
+         pay="$177.3–233.9k/yr", annual=233940, posted="2026-10-12", source=ZR,
+         url=zr("CpQBChZfN1M1RDdPaURSRFNoTHlaVTJ6UWlBEiQwMWExNDRjZC0wZWUzLTc3YmQtYTNmZS0wNDRiNmNhNjY0NGQaUEFBRXp2TGtkSEFaOXZrT0VTNTkyb2d3UVg0aTZoMlU0cGVIVVN3MGlRVHV2Q2IzbUtKdlBaLTF5VEJXbWJhS1hBRER1RDY5MzBSWVVwb2Y5IMmtBRABGMmtBQ%3D%3D"),
+         hook="UC Davis Health's hospital medicine team in Sacramento would use the acute and undifferentiated "
+              "presentations I manage in the ED and my two internal medicine rotations.",
+         gap="I have not worked as an inpatient hospitalist PA, and I would expect to be trained in inpatient "
+             "management.",
+         fit=[LIC, ("ok", "Local, and the pay is far above your minimum."),
+              ("ok", "Acute care and internal medicine (2 rotations) match, and ED cardiac, respiratory and neurological "
+                     "cases carry over."),
+              ("warn", "No inpatient or hospital medicine employment on your resume. Posting details were not captured.")]),
+
+    dict(id="planned-parenthood-np-pa-sacramento", group=G_PRIM, kind="pa", track="wh", desc=(
+            "Search summary. Full posting not captured. Planned Parenthood Mar Monte, Nurse Practitioner or Physician "
+            "Assistant (NP/PA/CNM/WHNP), B Street, Sacramento, full time, on site, $132–140k/yr, with the title noting "
+            "that new graduates are welcome. Posted about four days before this search."),
+         title="NP/PA/CNM/WHNP (B Street, new grads welcome)", employer="Planned Parenthood Mar Monte",
+         location="Sacramento, CA", pay="$132–140k/yr", annual=140000, posted="2026-10-12", source=ZR,
+         url=zr("CpQBChZLR2dqNGxJY1dOcDVtQ2pNbGpqdWpBEiQwMWExNDRjZC0wZjVmLTc1NjQtOTZlMi05MTk5MmMxZWU4ZTAaUEFBRU5NYmk4RGpBLW43RGxDUjFDTmhTRl9jTGpjdnVNSVd0WHpvZDhOUEotX0tIRDMxZDl4Vlh0ZVd1Wnh2bF9FSWwtVnBsWDBoOTVmUXJjIMmtBRABGMmtBQ%3D%3D"),
+         hook="A reproductive health role in Sacramento that welcomes new graduates is a good fit for my women's health "
+              "rotation and my family medicine training.",
+         gap="I have not practiced in reproductive health beyond my rotation and the related cases I manage in the ED, "
+             "and I would expect to be trained in the clinic's protocols.",
+         fit=[LIC, ("ok", "The title says new graduates are welcome, so about one year of experience is not a barrier."),
+              ("ok", "Local to Sacramento, and the pay is well above your minimum."),
+              ("ok", "Women's health and family medicine rotations apply."),
+              ("warn", "Posting details were not captured. Read the full listing for scope, schedule and procedures.")]),
+
+    dict(id="caredesk-crc-sacramento", group=G_RES, kind="research", track="research", desc=(
+            "Search summary. Full posting not captured. CareDesk, Clinical Research Coordinator, Sacramento, full "
+            "time, $20–30/hr, posted Oct 13, 2026."),
+         title="Clinical Research Coordinator", employer="CareDesk", location="Sacramento, CA",
+         pay="$20–30/hr", annual=62400, posted="2026-10-13", source=IND,
+         url="https://to.indeed.com/aalx6jhskgc2",
+         hook="A coordinator role in Sacramento would let me use my breast and gynecologic oncology trial experience "
+              "while I complete licensure.",
+         fit=[("warn", "Pay is far below a PA salary. Only a fallback or side option."),
+              ("ok", "Your IU Simon CRA role (managing breast and gynecologic oncology trials, sponsor updates, record "
+                     "keeping) matches coordinator duties.")]),
+
+    dict(id="actalent-contract-cra-remote", group=G_RES, kind="research", track="cra", relocate=False, desc=(
+            "Search summary. Full posting not captured. Actalent, Contract Clinical Research Associate, remote "
+            "(listed under San Diego), contractor, $140–190k/yr with medical, dental, vision and retirement. "
+            "Posted about three days before this search."),
+         title="Contract Clinical Research Associate (remote)", employer="Actalent", location="Remote (San Diego listed)",
+         pay="$140–190k/yr", annual=190000, posted="2026-10-13", source=ZR,
+         url=zr("Cp8BChYzWFlvVzFJa0dHZGdBcF9vdWliaDh3EiQwMWExNDRjZC0wZWViLTdjMjItOGQ3Yy1lNjY3YzQxMzFlY2EaW0FBRVhKaGJBSlF0cFFqcUptOTIzR2ZCbFk4ZEF3cm1PZDdtSU53QVVMdVBpdVQzaFhfSDlzbzBTX0c5d0hxUlFRbkhmYVdkY2IzYjkxVWhOWHpWV2NLeFkzNk0gya0FEAEYya0F"),
+         hook="A remote contract CRA role would let me return to clinical research with a clinician's perspective.",
+         gap="I do not know the experience this role requires. My CRA experience is from 2022 to 2023 at the IU Simon "
+             "Comprehensive Cancer Center, and I would welcome a conversation about how it compares.",
+         fit=[("warn", "Requirements were not captured. A contract CRA role is likely to want monitoring experience, "
+                       "which your IU Simon role does not show."),
+              ("warn", "CCRA is expired and recertification is in process; the letter says so."),
+              ("ok", "Remote, and the pay is above your minimum.")]),
+
+    dict(id="comphealth-locum-pa-em-waterloo", group=G_LOCUM, kind="inquiry", track="locum", relocate=False, rank=2, desc=(
+            "Search summary. Full posting not captured. CompHealth, Locum Tenens PA, Emergency Medicine, Waterloo, "
+            "Iowa, on site. ZipRecruiter shows an annualized $247–394.5k and no hourly rate. Posted about two days "
+            "before this search. " + NOTOPEN_TEXT),
+         title="Locum Tenens PA, Emergency Medicine (Waterloo, IA)", employer="CompHealth", location="Waterloo, IA",
+         pay="Hourly not shown", annual=None, posted="2026-10-14", source=ZR,
+         url=zr("Cp8BChZrOXVkdGVEUUlvaDloME01QXFxd19nEiQwMWExNDRjZC0wZjQ0LTdhNjctODgwYi0wZTAwN2RmYTQzODgaW0FBSHJkelhMakdMMFZtY2FCS0VCYVBCX0xac2FIb0FzWk81ci12RUFid0Q1QktKYkZyQ1NYcURqSFJzWkc2a2hDRjhWbkJWWTloTmlWbzczT2ZlS3dpM2tpaG8gya0FEAEYya0F"),
+         hook="A locum emergency medicine assignment in Waterloo, Iowa is a direct continuation of the work I do now.",
+         license_line="I am licensed as a PA in Iowa and Indiana.",
+         ask="Could you tell me the hourly rate, the facility and shift schedule, and the credentialing steps? My "
+             "resume is attached.",
+         fit=[("ok", "Iowa locum PA role in emergency medicine, where you are licensed."),
+              ("warn", "Waterloo is where you work now. Check whether this is your own employer's ED and whether your "
+                       "contract allows outside locum work."),
+              ("warn", "ZipRecruiter shows an annualized $247–394.5k and no hourly rate. Ask for the hourly PA rate. "
+                       "Other CompHealth Iowa PA EM postings show $75–110/hr."),
+              COMMON]),
+
+    dict(id="jackson-coker-locum-np-em-waterloo", group=G_LOCUM, kind="inquiry", track="locum", relocate=False, rank=3, desc=(
+            "Search summary. Full posting not captured. Jackson and Coker, Nurse Practitioner, Emergency Medicine, "
+            "Waterloo, Iowa, on site. ZipRecruiter shows an annualized $119.5–394.5k. Posted the day of this "
+            "search. The title is for a Nurse Practitioner. " + NOTOPEN_TEXT),
+         title="Locum Nurse Practitioner, Emergency Medicine (Waterloo, IA)", employer="Jackson and Coker",
+         location="Waterloo, IA", pay="Hourly not shown", annual=None, posted="2026-10-16", source=ZR,
+         url=zr("Cp8BChZENVZ3NmV5NWRHOTg0WUY1UUc5TzFBEiQwMWExNDRjZC0wZjQ0LTdhN2EtYjExNC1iYTgxYWY3MmEzOTkaW0FBSDBnSVE0S2dUeEgyX1NyelZmVTA4dmdaOVZoaVQ1bHJSNVpNaVpZZ1c0UXpFYW9TbVVNS3dnUnZqZWZVQWdtekJRMHVpY3RfSVZOTWlWQ0RNcHFLdEJnRFkgya0FEAEYya0F"),
+         hook="I am interested in emergency medicine locum assignments in Waterloo, Iowa and would like to ask whether "
+              "physician assistants are considered.",
+         license_line="I am licensed as a PA in Iowa and Indiana.",
+         ask="Could you tell me whether PAs are eligible for this assignment, the hourly rate, and the credentialing "
+             "steps? My resume is attached.",
+         fit=[("gap", "Listed for Nurse Practitioners. Ask whether PAs are considered."),
+              ("warn", "Waterloo is where you work now. Check whether this is your own employer's ED and whether your "
+                       "contract allows outside locum work."),
+              ("ok", "Iowa, where you are licensed.")]),
+
+    dict(id="decatur-county-prn-ed-greensburg", group=G_LOCUM, kind="inquiry", track="locum", relocate=False, rank=2, desc=(
+            "Search summary, undated. Decatur County Memorial Hospital, Greensburg, Indiana: PRN emergency medicine "
+            "advanced practice clinician (PA or NP) in an 11-bed ED, with 24-hour physician coverage and 12 hours of "
+            "advanced practice coverage, no overnights. Pay not listed (bonus negotiable). " + NOTOPEN_TEXT),
+         title="PRN Emergency Medicine Advanced Practice Clinician (PA or NP)", employer="Decatur County Memorial Hospital",
+         location="Greensburg, IN", pay="Not listed", annual=None, posted="", source="PracticeMatch (via web search)",
+         url="https://www.practicematch.com/physicians/job-details.cfm/1031516",
+         hook="A PRN emergency department role in Greensburg, with physician coverage around the clock and no overnights, "
+              "is the kind of Indiana emergency work I am looking for.",
+         license_line="I am licensed as a PA in Iowa and Indiana.",
+         ask="Could you tell me whether this role is still open, the PRN schedule, and the pay? My resume is attached.",
+         fit=[("ok", "Indiana PRN emergency role, where you are licensed."),
+              ("ok", "24-hour physician coverage and no overnights make this a supported setting for about one year of "
+                     "experience."),
+              ("warn", "Pay is not listed. Ask whether it reaches $100/hr."),
+              ("warn", "The listing has no date. Confirm it is still open."),
+              ("info", "Greensburg is in southeast Indiana, a long drive from Waterloo, Iowa.")]),
+
+    dict(id="terre-haute-regional-prn-ed-app", group=G_LOCUM, kind="inquiry", track="locum", relocate=False, rank=2, desc=(
+            "Search summary, undated. Terre Haute Regional Hospital, Indiana (278 beds): PRN emergency medicine "
+            "advanced practice provider with flexible shifts, with 1 or more years of emergency APP experience "
+            "preferred. Pay not listed. The link is the PracticeMatch posting whose title matches. " + NOTOPEN_TEXT),
+         title="PRN Experienced Emergency Medicine APP", employer="Terre Haute Regional Hospital",
+         location="Terre Haute, IN", pay="Not listed", annual=None, posted="", source="PracticeMatch (via web search)",
+         url="https://www.practicematch.com/physicians/job-details.cfm/955288",
+         hook="A PRN emergency department role with flexible shifts at Terre Haute Regional is the kind of Indiana "
+              "emergency work I am looking for.",
+         license_line="I am licensed as a PA in Iowa and Indiana.",
+         ask="Could you tell me whether this role is still open, how much emergency APP experience is expected, and "
+             "the pay? My resume is attached.",
+         fit=[("ok", "Indiana PRN emergency role, where you are licensed."),
+              ("warn", "1 or more years of emergency APP experience is preferred. You have about one year."),
+              ("warn", "Pay is not listed, and the posting has no date. Confirm both."),
+              ("info", "Terre Haute is in western Indiana, a long drive from Waterloo, Iowa.")]),
+
+    dict(id="comphealth-locum-pa-uc-fm-em-downers-grove", group=G_LOCUM, kind="inquiry", track="locum", relocate=False, rank=3, desc=(
+            "Search summary. Full posting not captured. CompHealth, Locum Tenens Urgent Care, Family Medicine or "
+            "Emergency Medicine Physician Assistant, Downers Grove, Illinois, temporary, on site, annualized "
+            "$150–190k (about $72–91/hr). Posted about two days before this search. " + NOTOPEN_TEXT),
+         title="Locum PA, Urgent Care / Family Medicine / EM (Downers Grove, IL)", employer="CompHealth",
+         location="Downers Grove, IL", pay="$150–190k/yr annualized", annual=None, posted="2026-10-14", source=ZR,
+         url=zr("Cp8BChZJUnV4ajRCUnZQSVRBVS0zdkVLSnZnEiQwMWExNDRjZC0wZjY2LTc5NzgtYTQ0NS0zNmRkY2RmNjZjY2QaW0FBSElpSUFIUjJUTjNSZVNlWVJuLXRQY2o1LVBuWFRZbjR1czZNaXVJUC1GTUI2cmVIUXA4QjBrODJ6NkxSNmZNRUxMNE5zT2cxTWczMkJNTm5qS1RwblNoU1Egya0FEAEYya0F"),
+         hook="A locum assignment that spans urgent care, family medicine and emergency medicine in the Chicago area "
+              "matches the breadth of my training.",
+         license_line="I am licensed as a PA in Iowa and Indiana, and my Illinois license application is in process.",
+         ask="Could you tell me the hourly rate, the schedule, and the Illinois licensure and credentialing steps? My "
+             "resume is attached.",
+         fit=[("gap", "Your Illinois license is in process. Credentialing cannot finish until it is issued."),
+              ("warn", "The annualized $150–190k works out to about $72–91/hr, under your $100 target."),
+              ("info", "Mixed urgent care, family medicine and EM, not a pure EM assignment.")]),
 ]
